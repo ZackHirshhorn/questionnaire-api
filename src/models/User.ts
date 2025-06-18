@@ -12,6 +12,7 @@ export interface IUser extends Document {
   phone: string;
   password: string;
   role: Role;
+  school: mongoose.Schema.Types.ObjectId;
   matchPassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -38,6 +39,11 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       enum: Object.values(Role),
       default: Role.User,
+      required: true,
+    },
+    school: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "School",
       required: true,
     },
   },
