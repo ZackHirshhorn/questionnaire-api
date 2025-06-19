@@ -10,8 +10,8 @@ const audienceSchema = new mongoose.Schema<IAudience>(
       type: String,
       required: true,
       match: [
-        /^[\u0590-\u05FF]+(?:[ '"\u0590-\u05FF]*[\u0590-\u05FF]+)*$/,
-        "Audience's name must contain only Hebrew letters and spaces",
+        /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z]*[\u0590-\u05FFa-z]+)*$/,
+        "Audience's name is not valid",
       ],
     },
   },

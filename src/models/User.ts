@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: true,
       match: [
-        /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
-        "User's name must contain only Hebrew letters and spaces",
+        /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z]*[\u0590-\u05FFa-z])?$/,
+        "User's name is not valid",
       ],
     },
     email: {
