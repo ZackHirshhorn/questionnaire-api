@@ -4,9 +4,35 @@ import generateToken from "../utils/generateToken";
 import User from "../models/User";
 import { registerSchema, loginSchema } from "../dto/users.dto";
 
-// @desc    Register a new user
-// @route   POST /api/auth
-// @access  Public
+/**
+ * @swagger
+ * /api/auth:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully and user json
+ *       400:
+ *         description: Invalid input | User already exists
+ */
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
@@ -52,9 +78,32 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc    Login user & get token
-// @route   POST /api/auth/login
-// @access  Public
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User successfully login and user json
+ *       400:
+ *         description: Invalid input | User not found
+ */
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -88,9 +137,20 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// @desc    Logout user / clear cookie
-// @route   POST /api/auth/logout
-// @access  Public
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: false
+ *     responses:
+ *       200:
+ *         description: User successfully logout and clear cookie
+ *       400:
+ *         description: Invalid input | User not found
+ */
 export const logout = (req: Request, res: Response) => {
   res.clearCookie("jwt");
   res.status(200).json({ message: "Logged out successfully" });

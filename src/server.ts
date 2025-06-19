@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes";
 import { notFound, errorHandler } from "./middlewares/errorsMiddleware";
 // Config
 import connectDB from "./config/db";
+import { setupSwagger } from "./config/swagger";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -35,10 +36,12 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 // app.use("/users", usersRoutes);
+setupSwagger(app);
 
 app.use(notFound);
 app.use(errorHandler);
 
 app.listen(port as number, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`Swagger docs at http://domain:${port}/api-docs`);
 });
