@@ -18,11 +18,6 @@ export const registerSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
     ),
-  phone: z
-    .string({ message: "Phone is required" })
-    .min(9, "Phone must be at least 9 characters")
-    .max(10, "Phone must be less than 10 characters")
-    .regex(/^[0-9]+$/, "Phone must contain only numbers"),
 });
 export type RegisterDTO = z.infer<typeof registerSchema>;
 

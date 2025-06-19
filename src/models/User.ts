@@ -9,10 +9,8 @@ export enum Role {
 export interface IUser extends Document {
   name: string;
   email: string;
-  phone: string;
   password: string;
   role: Role;
-  school: mongoose.Schema.Types.ObjectId;
   matchPassword: (enteredPassword: string) => Promise<boolean>;
 }
 
@@ -26,11 +24,6 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: true,
     },
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     password: {
       type: String,
       required: true,
@@ -41,14 +34,8 @@ const userSchema = new mongoose.Schema<IUser>(
       default: Role.User,
       required: true,
     },
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "School",
-      required: true,
-    },
   },
   {
-    timestamps: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;

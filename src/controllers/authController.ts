@@ -2,19 +2,18 @@ import { Request, Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler";
 import generateToken from "../utils/generateToken";
 import User from "../models/User";
-import { registerSchema, loginSchema } from "../DTO/users.dto";
+import { registerSchema, loginSchema } from "../dto/users.dto";
 
 // @desc    Register a new user
 // @route   POST /api/auth
 // @access  Public
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password } = req.body;
 
   const result = registerSchema.safeParse({
     email: email.trim() || "",
     password: password.trim() || "",
     name: name.trim() || "",
-    phone: phone.trim() || "",
   });
   if (!result.success) {
     const errors = [];
@@ -36,7 +35,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     name: name.trim(),
     email: email.trim(),
     password: password.trim(),
-    phone: phone.trim(),
   });
 
   if (user) {
@@ -46,7 +44,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      phone: user.phone,
       role: user.role,
     });
   } else {
@@ -83,7 +80,6 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      phone: user.phone,
       role: user.role,
     });
   } else {

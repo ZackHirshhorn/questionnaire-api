@@ -12,7 +12,6 @@ const audienceSchema = new mongoose.Schema<IAudience>(
     },
   },
   {
-    timestamps: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;
