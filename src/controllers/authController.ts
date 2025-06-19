@@ -32,6 +32,8 @@ import { registerSchema, loginSchema } from "../dto/users.dto";
  *         description: User created successfully and user json
  *       400:
  *         description: Invalid input | User already exists
+ *       500:
+ *         description: Database error
  */
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -143,8 +145,6 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
- *     requestBody:
- *       required: false
  *     responses:
  *       200:
  *         description: User successfully logout and clear cookie
