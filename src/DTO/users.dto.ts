@@ -3,12 +3,12 @@ import { z } from "zod";
 export const registerSchema = z.object({
   email: z.string({ message: "Email is required" }).email("Email is invalid"),
   name: z
-    .string({ message: "name is required" })
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be less than 50 characters")
+    .string({ message: "User's name is required" })
+    .min(2, "User's name must be at least 2 characters")
+    .max(50, "User's name must be less than 50 characters")
     .regex(
       /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
-      "Name must contain only Hebrew letters and spaces",
+      "User's name must contain only Hebrew letters and spaces",
     ),
   password: z
     .string({ message: "Password is required" })

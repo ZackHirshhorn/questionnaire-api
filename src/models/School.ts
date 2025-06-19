@@ -9,6 +9,10 @@ const schoolSchema = new mongoose.Schema<ISchool>(
     name: {
       type: String,
       required: true,
+      match: [
+        /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
+        "School's name must contain only Hebrew letters and spaces",
+      ],
     },
   },
   {

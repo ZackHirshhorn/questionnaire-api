@@ -14,6 +14,10 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
     name: {
       type: String,
       required: true,
+      match: [
+        /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
+        "Questionnaire's name must contain only Hebrew letters and spaces",
+      ],
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -21,6 +25,7 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
     },
     userPhone: {
       type: String,
+      match: [/^[0-9]{9,10}$/, "User's phone number must contain 9-10 digits"],
     },
     toke: {
       type: String,
@@ -57,6 +62,8 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
 );
 
 questionnaireSchema.index({ name: 1 }, { unique: true });
+questionnaireSchema.index({ user: 1 });
+questionnaireSchema.index({ school: 1 });
 
 const Questionnaire = mongoose.model<IQuestionnaire>(
   "Questionnaire",

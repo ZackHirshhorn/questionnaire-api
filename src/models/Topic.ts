@@ -49,6 +49,10 @@ const topicSchema = new mongoose.Schema<ITopic>(
     name: {
       type: String,
       required: true,
+      match: [
+        /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
+        "Topic's name must contain only Hebrew letters and spaces",
+      ],
     },
     questions: [questionSchema],
     childTopics: {

@@ -9,6 +9,10 @@ const audienceSchema = new mongoose.Schema<IAudience>(
     name: {
       type: String,
       required: true,
+      match: [
+        /^[\u0590-\u05FF]+(?:[ '"\u0590-\u05FF]*[\u0590-\u05FF]+)*$/,
+        "Audience's name must contain only Hebrew letters and spaces",
+      ],
     },
   },
   {
