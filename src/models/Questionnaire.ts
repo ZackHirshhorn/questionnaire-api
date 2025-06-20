@@ -6,7 +6,7 @@ export interface IQuestionnaire extends Document {
   userPhone?: string;
   toke?: string;
   school: mongoose.Types.ObjectId;
-  topics: mongoose.Types.ObjectId[];
+  categories: mongoose.Types.ObjectId[];
 }
 
 const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
@@ -35,18 +35,18 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
       ref: "School",
       required: true,
     },
-    topics: {
+    categories: {
       type: [
         {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Topic",
+          ref: "Category",
         },
       ],
       validate: {
         validator: function (arr: mongoose.Types.ObjectId[]) {
           return arr.length <= 10;
         },
-        message: "A questionnaire can have at most 10 topics",
+        message: "A questionnaire can have at most 10 categories",
       },
     },
   },

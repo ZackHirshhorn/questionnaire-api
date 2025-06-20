@@ -38,22 +38,27 @@ const questionSchema = new mongoose.Schema<IQuestion>(
   },
 );
 
-export interface ITopic extends Document {
+export interface ISubCategory extends Document {
   name: string;
   questions: IQuestion[];
+  topic?: mongoose.Schema.Types.ObjectId[];
 }
 
-const topicSchema = new mongoose.Schema<ITopic>(
+const subCategorySchema = new mongoose.Schema<ISubCategory>(
   {
     name: {
       type: String,
       required: true,
       match: [
         /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z]*[\u0590-\u05FFa-z])?$/,
-        "Topic's name is not valid",
+        "Sub-category's name is not valid",
       ],
     },
     questions: [questionSchema],
+    topic: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Topic",
+    },
   },
   {
     toJSON: {
@@ -66,8 +71,8 @@ const topicSchema = new mongoose.Schema<ITopic>(
   },
 );
 
-topicSchema.index({ name: 1 }, { unique: true });
+subCategorySchema.index({ name: 1 }, { unique: true });
 
-const Topic = mongoose.model<ITopic>("Topic", topicSchema);
+const Category = mongoose.model<ISubCategory>("Category", subCategorySchema);
 
-export default Topic;
+export default Category;
