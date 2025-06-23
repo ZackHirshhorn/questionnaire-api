@@ -29,7 +29,25 @@ import { registerSchema, loginSchema } from "../dto/users.dto";
  *                 type: string
  *     responses:
  *       201:
- *         description: User created successfully and user json
+ *         description: User created successfully, cookie set and user json
+ *         headers:
+ *           set-cookie:
+ *             description: JWT token cookie
+ *             schema:
+ *               type: string
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
  *       400:
  *         description: Invalid input | User already exists
  *       500:
@@ -102,9 +120,27 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
  *                 type: string
  *     responses:
  *       200:
- *         description: User successfully login and user json
+ *         description: User successfully logged in, JWT cookie set
+ *         headers:
+ *           set-cookie:
+ *             description: JWT token cookie
+ *             schema:
+ *               type: string
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
  *       400:
- *         description: Invalid input | User not found
+ *         description: Invalid input or user not found
  */
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -143,7 +179,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
  * @swagger
  * /api/auth/logout:
  *   post:
- *     summary: Register a new user
+ *     summary: Logout a user
  *     tags: [Auth]
  *     responses:
  *       200:

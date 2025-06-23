@@ -1,23 +1,20 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 export interface IQuestionnaire extends Document {
-  name: string;
   user?: mongoose.Types.ObjectId;
   userPhone?: string;
   toke?: string;
   school: mongoose.Types.ObjectId;
   categories: mongoose.Types.ObjectId[];
+  template: mongoose.Types.ObjectId;
 }
 
 const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
   {
-    name: {
-      type: String,
+    template: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QuestionnaireTemp",
       required: true,
-      match: [
-        /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z]*[\u0590-\u05FFa-z])?$/,
-        "Questionnaire's name is not valid",
-      ],
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,20 +31,6 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "School",
       required: true,
-    },
-    categories: {
-      type: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Category",
-        },
-      ],
-      validate: {
-        validator: function (arr: mongoose.Types.ObjectId[]) {
-          return arr.length <= 10;
-        },
-        message: "A questionnaire can have at most 10 categories",
-      },
     },
   },
   {

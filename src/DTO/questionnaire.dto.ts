@@ -10,9 +10,10 @@ export const questionnaireSchema = z.object({
       "Questionnaire's name is not valid",
     ),
   userPhone: z
-    .string({ message: "User's phone number is required" })
+    .string()
     .min(9, "User's phone number must be at least 9 digits")
     .max(10, "User's phone number must be less than 10 digits")
-    .regex(/^[0-9]{9,10}$/, "User's phone number is not valid"),
+    .regex(/^[0-9]{9,10}$/, "User's phone number is not valid")
+    .optional(),
 });
 export type QuestionnaireDTO = z.infer<typeof questionnaireSchema>;

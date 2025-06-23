@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 // Routes
 import authRoutes from "./routes/authRoutes";
 // import usersRoutes from "./routes/usersRoutes";
+import schoolRoutes from "./routes/schoolRoutes";
+import templateRoutes from "./routes/templateRoutes";
 // Middlewares
 import { notFound, errorHandler } from "./middlewares/errorsMiddleware";
 // Config
@@ -21,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    // origin: "https://your-frontend-domain.com",
+    // origin: "http://localhost:5000",
     credentials: true,
   }),
 );
@@ -35,6 +37,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/school", schoolRoutes);
+app.use("/api/template", templateRoutes);
 // app.use("/users", usersRoutes);
 setupSwagger(app);
 
@@ -43,5 +47,5 @@ app.use(errorHandler);
 
 app.listen(port as number, () => {
   console.log(`Server is running on port ${port}`);
-  console.log(`Swagger docs at http://domain:${port}/api-docs`);
+  console.log(`Swagger docs at http://domain/api-docs`);
 });

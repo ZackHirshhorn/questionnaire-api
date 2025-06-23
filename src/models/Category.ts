@@ -5,6 +5,7 @@ export interface IQuestion extends Document {
   choice: string[];
   qType: string;
   required: boolean;
+  answer?: string;
 }
 
 const questionSchema = new mongoose.Schema<IQuestion>(
@@ -25,6 +26,9 @@ const questionSchema = new mongoose.Schema<IQuestion>(
     required: {
       type: Boolean,
       required: true,
+    },
+    answer: {
+      type: String,
     },
   },
   {
@@ -74,5 +78,4 @@ const categorySchema = new mongoose.Schema<ICategory>(
 categorySchema.index({ name: 1 }, { unique: true });
 
 const Category = mongoose.model<ICategory>("Category", categorySchema);
-
 export default Category;
