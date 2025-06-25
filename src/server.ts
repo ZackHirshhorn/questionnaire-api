@@ -45,7 +45,7 @@ setupSwagger(app);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port as number, () => {
+app.listen(port as number, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
   console.log(`Swagger docs at http://domain/api-docs`);
 });
