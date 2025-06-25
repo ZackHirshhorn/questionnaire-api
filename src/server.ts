@@ -47,5 +47,7 @@ app.use(errorHandler);
 
 app.listen(port as number, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
-  console.log(`Swagger docs at http://domain/api-docs`);
+  console.log(
+    `Swagger docs at https://question-api-01wm.onrender.com/api-docs`,
+  );
 });

@@ -258,7 +258,7 @@ export const createTemplate = asyncHandler(
  * @swagger
  * /api/template/{id}:
  *   get:
- *     summary: Get a questionnaire template by ID
+ *     summary: Admin get a questionnaire template by ID
  *     tags: [Template]
  *     parameters:
  *       - in: path
