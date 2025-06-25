@@ -4,4 +4,5 @@ export type Question = {
   qType: string;
   required: boolean;
   answer?: string;
+  id?: string;
 };
