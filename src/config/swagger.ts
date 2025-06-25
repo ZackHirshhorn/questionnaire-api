@@ -12,11 +12,16 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:5000",
+        url: "https://question-api-01wm.onrender.com",
       },
     ],
   },
-  apis: ["./src/routes/*.ts", "./src/controllers/*.ts"], // adjust path to your route files
+  apis: [
+    "./src/routes/*.ts",
+    "./src/controllers/*.ts",
+    "./dist/routes/*.ts",
+    "./dist/controllers/*.ts",
+  ], // adjust path to your route files
 };
 
 const swaggerSpec = swaggerJsdoc(options);
