@@ -4,6 +4,6 @@ import { Question } from "./questions";
 export type SubCategory = {
   name: string;
   questions: Question[];
-  topics: Topic[];
+  topics?: Topic[];
   id?: string;
 };

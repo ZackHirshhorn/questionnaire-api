@@ -5,5 +5,5 @@ export type Category = {
   id?: string;
   name: string;
   questions: Question[];
-  subCategories: SubCategory[];
+  subCategories?: SubCategory[];
 };
