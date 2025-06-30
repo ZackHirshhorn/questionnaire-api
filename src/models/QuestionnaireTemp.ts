@@ -53,7 +53,7 @@ const topicSchema = new mongoose.Schema<ITopic>(
       type: String,
       required: true,
       match: [
-        /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
+        /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
         "Topic's name is not valid",
       ],
     },
@@ -82,7 +82,7 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
       type: String,
       required: true,
       match: [
-        /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
+        /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
         "Sub-category's name is not valid",
       ],
     },
@@ -120,7 +120,7 @@ const categorySchema = new mongoose.Schema<ICategory>(
       type: String,
       required: true,
       match: [
-        /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
+        /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
         "Category's name is not valid",
       ],
     },
