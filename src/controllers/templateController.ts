@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler";
 import QuestionnaireTemp from "../models/QuestionnaireTemp";
 import { questionnaireSchema } from "../dto/questionnaire.dto";
+import { categorySchema } from "../dto/category.dto";
+import { subCategorySchema } from "../dto/subCategory.dto";
+import { topicSchema } from "../dto/topic.dto";
 import { Template } from "../types/template";
 import { ICategory } from "../models/QuestionnaireTemp";
 
@@ -158,6 +161,11 @@ export const createTemplate = asyncHandler(
       const catNames = new Set();
       for (const cat of template.categories) {
         const catName = cat.name.trim();
+        const result = categorySchema.safeParse({ name: catName });
+        if (!result.success) {
+          const errors = result.error.errors.map((err) => err.message);
+          return res.status(400).json({ message: errors });
+        }
         if (catNames.has(catName))
           throw new Error(`כפילות שם קטגוריה: '${catName}'`);
         catNames.add(catName);
@@ -168,6 +176,11 @@ export const createTemplate = asyncHandler(
         const subNames = new Set();
         for (const sub of cat.subCategories || []) {
           const subName = sub.name.trim();
+          const result = subCategorySchema.safeParse({ name: subName });
+          if (!result.success) {
+            const errors = result.error.errors.map((err) => err.message);
+            return res.status(400).json({ message: errors });
+          }
           if (subNames.has(subName))
             throw new Error(`כפילויות שם תת קטגוריה: '${subName}'`);
           subNames.add(subName);
@@ -178,6 +191,11 @@ export const createTemplate = asyncHandler(
           const topicNames = new Set();
           for (const topic of sub.topics || []) {
             const topicName = topic.name.trim();
+            const result = topicSchema.safeParse({ name: topicName });
+            if (!result.success) {
+              const errors = result.error.errors.map((err) => err.message);
+              return res.status(400).json({ message: errors });
+            }
             if (topicNames.has(topicName))
               throw new Error(
                 `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`,
@@ -358,6 +376,11 @@ export const updateTemplate = asyncHandler(
       const catNames = new Set();
       for (const cat of template.categories) {
         const catName = cat.name.trim();
+        const result = categorySchema.safeParse({ name: catName });
+        if (!result.success) {
+          const errors = result.error.errors.map((err) => err.message);
+          return res.status(400).json({ message: errors });
+        }
         if (catNames.has(catName))
           throw new Error(`כפילות שם קטגוריה: '${catName}'`);
         catNames.add(catName);
@@ -368,6 +391,11 @@ export const updateTemplate = asyncHandler(
         const subNames = new Set();
         for (const sub of cat.subCategories || []) {
           const subName = sub.name.trim();
+          const result = subCategorySchema.safeParse({ name: subName });
+          if (!result.success) {
+            const errors = result.error.errors.map((err) => err.message);
+            return res.status(400).json({ message: errors });
+          }
           if (subNames.has(subName))
             throw new Error(`כפילויות שם תת קטגוריה: '${subName}'`);
           subNames.add(subName);
@@ -378,6 +406,11 @@ export const updateTemplate = asyncHandler(
           const topicNames = new Set();
           for (const topic of sub.topics || []) {
             const topicName = topic.name.trim();
+            const result = topicSchema.safeParse({ name: topicName });
+            if (!result.success) {
+              const errors = result.error.errors.map((err) => err.message);
+              return res.status(400).json({ message: errors });
+            }
             if (topicNames.has(topicName))
               throw new Error(
                 `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`,

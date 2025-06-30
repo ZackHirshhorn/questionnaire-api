@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const sybCategorySchema = z.object({
+export const subCategorySchema = z.object({
   name: z
     .string({ message: "תת קטגוריה היא חובה" })
     .min(2, "שם תת הקטגוריה חייב להכיל לפחות 2 תווים")
@@ -10,4 +10,4 @@ export const sybCategorySchema = z.object({
       "שם תת הקטגוריה לא תקין",
     ),
 });
-export type SubCategoryDTO = z.infer<typeof sybCategorySchema>;
+export type SubCategoryDTO = z.infer<typeof subCategorySchema>;
