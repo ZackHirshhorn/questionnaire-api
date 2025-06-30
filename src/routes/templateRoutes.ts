@@ -3,7 +3,7 @@ import { admin, protect } from "../middlewares/authMiddleware";
 import {
   createTemplate,
   getTemplate,
-  updateTemplate,
+  // updateTemplate,
   deleteTemplate,
 } from "../controllers/templateController";
 
@@ -13,7 +13,7 @@ router.route("/").post(protect, admin, createTemplate);
 router
   .route("/:id")
   .get(protect, admin, getTemplate)
-  .put(protect, admin, updateTemplate)
+  // .put(protect, admin, updateTemplate)
   .delete(protect, admin, deleteTemplate);
 
 export default router;

@@ -2,18 +2,18 @@ import { z } from "zod";
 
 export const questionnaireSchema = z.object({
   name: z
-    .string({ message: "Questionnaire's name is required" })
-    .min(2, "Questionnaire's name must be at least 2 characters")
-    .max(50, "Questionnaire's name must be less than 50 characters")
+    .string({ message: "שם השאלון הוא חובה" })
+    .min(2, "שם השאלון חייב להכיל לפחות 2 תווים")
+    .max(50, "שם השאלון יכול להכיל עד 50 תווים")
     .regex(
-      /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z]*[\u0590-\u05FFa-z])?$/,
-      "Questionnaire's name is not valid",
+      /^[\u0590-\u05FFA-Z](?:['"\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
+      "שם השאלון לא תקין",
     ),
   userPhone: z
     .string()
-    .min(9, "User's phone number must be at least 9 digits")
-    .max(10, "User's phone number must be less than 10 digits")
-    .regex(/^[0-9]{9,10}$/, "User's phone number is not valid")
+    .min(9, "טלפון המשתמש חייב להכיל לפחות 9 ספרות")
+    .max(10, "טלפון המשתמש יכול להכיל עד 10 ספרות")
+    .regex(/^[0-9]{9,10}$/, "טלפון המשתמש אינו תקין")
     .optional(),
 });
 export type QuestionnaireDTO = z.infer<typeof questionnaireSchema>;

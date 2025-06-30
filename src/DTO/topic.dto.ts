@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const topicSchema = z.object({
   name: z
-    .string({ message: "Topic's name is required" })
-    .min(2, "Topic's name must be at least 2 characters")
-    .max(50, "Topic's name must be less than 50 characters")
+    .string({ message: "שם הנושא הוא חובה" })
+    .min(2, "שם הנושא חייב להכיל לפחות 2 תווים")
+    .max(50, "שם הנושא יכול להכיל עד 50 תווים")
     .regex(
-      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z]*[\u0590-\u05FFa-z]+)*$/,
-      "Topic's name is not valid",
+      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
+      "שם הנושא לא תקין",
     ),
 });
 export type TopicDTO = z.infer<typeof topicSchema>;

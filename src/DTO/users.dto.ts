@@ -1,35 +1,35 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-  email: z.string({ message: "Email is required" }).email("Email is invalid"),
+  email: z.string({ message: "אימייל הוא חובה" }).email("אימייל לא תקין"),
   name: z
-    .string({ message: "User's name is required" })
-    .min(2, "User's name must be at least 2 characters")
-    .max(50, "User's name must be less than 50 characters")
+    .string({ message: "שם משתמש הוא חובה" })
+    .min(2, "שם המשתמש חייב להכיל לפחות 2 תווים")
+    .max(50, "שם המשתמש יכול להכיל עד 50 תווים")
     .regex(
       /^[\u0590-\u05FF](?:[\u0590-\u05FF ]*[\u0590-\u05FF])?$/,
-      "User's name must contain only Hebrew letters and spaces",
+      "שם המשתמש יכול להכיל רק אותיות בעברית",
     ),
   password: z
-    .string({ message: "Password is required" })
-    .min(8, "Password must be at least 8 characters")
-    .max(50, "Password must be less than 50 characters")
+    .string({ message: "סיסמא היא חובה" })
+    .min(8, "הסיסמא חייב להכיל לפחות 8 תווים")
+    .max(50, "הסיסמא יכולה להכיל עד 50 תווים")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "הסיסמה חייבת להכיל לפחות אות גדולה אחת, אות קטנה אחת, מספר אחד ותו מיוחד אחד",
     ),
 });
 export type RegisterDTO = z.infer<typeof registerSchema>;
 
 export const loginSchema = z.object({
-  email: z.string({ message: "Email is required" }).email("Email is invalid"),
+  email: z.string({ message: "אימייל הוא חובה" }).email("אימייל לא תקין"),
   password: z
-    .string({ message: "Password is required" })
-    .min(8, "Password must be at least 8 characters")
-    .max(50, "Password must be less than 50 characters")
+    .string({ message: "סיסמא היא חובה" })
+    .min(8, "הסיסמא חייב להכיל לפחות 8 תווים")
+    .max(50, "הסיסמא יכולה להכיל עד 50 תווים")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "הסיסמה חייבת להכיל לפחות אות גדולה אחת, אות קטנה אחת, מספר אחד ותו מיוחד אחד",
     ),
 });
 export type LoginDTO = z.infer<typeof loginSchema>;

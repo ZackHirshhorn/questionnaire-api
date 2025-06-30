@@ -74,7 +74,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   if (userExists) {
     res.status(400);
-    throw new Error("User already exists");
+    throw new Error("האימייל כבר קיים במערכת");
   }
 
   const user = await User.create({
@@ -171,7 +171,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     });
   } else {
     res.status(401);
-    throw new Error("Invalid email or password");
+    throw new Error("איימייל או סיסמא לא תקינים");
   }
 });
 
@@ -189,5 +189,5 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
  */
 export const logout = (req: Request, res: Response) => {
   res.clearCookie("jwt");
-  res.status(200).json({ message: "Logged out successfully" });
+  res.status(200).json({ message: "ההתנקות בוצעה בהצלחה" });
 };

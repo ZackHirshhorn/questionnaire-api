@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const sybCategorySchema = z.object({
   name: z
-    .string({ message: "Sub-Category's name is required" })
-    .min(2, "Sub-Category's name must be at least 2 characters")
-    .max(50, "Sub-Category's name must be less than 50 characters")
+    .string({ message: "תת קטגוריה היא חובה" })
+    .min(2, "שם תת הקטגוריה חייב להכיל לפחות 2 תווים")
+    .max(50, "שם תת הקטגוריה יכול להכיל עד 50 תווים")
     .regex(
-      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z]*[\u0590-\u05FFa-z]+)*$/,
-      "Sub-Category's name is not valid",
+      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
+      "שם תת הקטגוריה לא תקין",
     ),
 });
 export type SubCategoryDTO = z.infer<typeof sybCategorySchema>;

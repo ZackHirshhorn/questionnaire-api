@@ -3,9 +3,6 @@ import asyncHandler from "../middlewares/asyncHandler";
 import QuestionnaireTemp from "../models/QuestionnaireTemp";
 import { questionnaireSchema } from "../dto/questionnaire.dto";
 import { Template } from "../types/template";
-import Topic from "../models/Topic";
-import SubCategory from "../models/SubCategory";
-import Category from "../models/Category";
 
 /**
  * @swagger
@@ -32,6 +29,7 @@ import Category from "../models/Category";
  *                     type: string
  *                   categories:
  *                     type: array
+ *                     maxItems: 10
  *                     items:
  *                       type: object
  *                       required:
@@ -62,195 +60,152 @@ import Category from "../models/Category";
  *                                 type: boolean
  *                               answer:
  *                                 type: string
- *                         subCategory:
- *                           type: object
- *                           required:
- *                             - name
- *                             - questions
- *                           properties:
- *                             name:
- *                               type: string
- *                             questions:
- *                               type: array
- *                               items:
- *                                 type: object
- *                                 required:
- *                                   - q
- *                                   - choice
- *                                   - qType
- *                                   - required
- *                                 properties:
- *                                   q:
- *                                     type: string
- *                                   choice:
- *                                     type: array
- *                                     items:
- *                                       type: string
- *                                   qType:
- *                                     type: string
+ *                         subCategories:
+ *                           type: array
+ *                           maxItems: 10
+ *                           items:
+ *                             type: object
+ *                             required:
+ *                               - name
+ *                               - questions
+ *                             properties:
+ *                               name:
+ *                                 type: string
+ *                               questions:
+ *                                 type: array
+ *                                 items:
+ *                                   type: object
  *                                   required:
- *                                     type: boolean
- *                                   answer:
- *                                     type: string
- *                             topic:
- *                               type: object
- *                               required:
- *                                 - name
- *                                 - questions
- *                               properties:
- *                                 name:
- *                                   type: string
- *                                 questions:
- *                                   type: array
- *                                   items:
- *                                     type: object
+ *                                     - q
+ *                                     - choice
+ *                                     - qType
+ *                                     - required
+ *                                   properties:
+ *                                     q:
+ *                                       type: string
+ *                                     choice:
+ *                                       type: array
+ *                                       items:
+ *                                         type: string
+ *                                     qType:
+ *                                       type: string
  *                                     required:
- *                                       - q
- *                                       - choice
- *                                       - qType
- *                                       - required
- *                                     properties:
- *                                       q:
- *                                         type: string
- *                                       choice:
- *                                         type: array
- *                                         items:
- *                                           type: string
- *                                       qType:
- *                                         type: string
- *                                       required:
- *                                         type: boolean
- *                                       answer:
- *                                         type: string
+ *                                       type: boolean
+ *                                     answer:
+ *                                       type: string
+ *                               topics:
+ *                                 type: array
+ *                                 maxItems: 10
+ *                                 items:
+ *                                   type: object
+ *                                   required:
+ *                                     - name
+ *                                     - questions
+ *                                   properties:
+ *                                     name:
+ *                                       type: string
+ *                                     questions:
+ *                                       type: array
+ *                                       items:
+ *                                         type: object
+ *                                         required:
+ *                                           - q
+ *                                           - choice
+ *                                           - qType
+ *                                           - required
+ *                                         properties:
+ *                                           q:
+ *                                             type: string
+ *                                           choice:
+ *                                             type: array
+ *                                             items:
+ *                                               type: string
+ *                                           qType:
+ *                                             type: string
+ *                                           required:
+ *                                             type: boolean
+ *                                           answer:
+ *                                             type: string
  *     responses:
  *       201:
- *         description: Template created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 template:
- *                   type: object
+ *         description: Template created successfully and template object
  *       400:
  *         description: Invalid input or duplicate name
  *       500:
  *         description: Internal server/database error
  */
+
 export const createTemplate = asyncHandler(
   async (req: Request<{}, {}, { template: Template }>, res: Response) => {
     const { template } = req.body;
-    const nameTrimmed = template.name.trim();
+    const trimmedName = template.name.trim();
 
-    // Validate name
-    const result = questionnaireSchema.safeParse({ name: nameTrimmed });
+    // 1. Validate Name using schema
+    const result = questionnaireSchema.safeParse({ name: trimmedName });
     if (!result.success) {
-      const errors = result.error.errors.map((error) => error.message);
+      const errors = result.error.errors.map((err) => err.message);
       return res.status(400).json({ message: errors });
     }
 
-    // Check if questionnaire name already exists
-    const existingTemplate = await QuestionnaireTemp.findOne({
-      name: nameTrimmed,
-    });
-    if (existingTemplate) {
-      return res
-        .status(400)
-        .json({ message: "Questionnaire's name already exists" });
+    // 2. Check if template name already exists
+    const existing = await QuestionnaireTemp.findOne({ name: trimmedName });
+    if (existing) {
+      throw new Error("שם השאלון כבר קיים");
     }
 
-    // Process all categories
-    const categoryPromises = template.categories.map(async (cat) => {
-      let subCategoryId: string | undefined;
-
-      // Handle SubCategory if exists
-      if (cat.subCategory) {
-        const {
-          name: subName,
-          questions: subQuestions,
-          topic,
-        } = cat.subCategory;
-
-        let topicId: string | undefined;
-
-        // Handle Topic if exists
-        if (topic) {
-          const existingTopic = await Topic.findOne({
-            name: topic.name.trim(),
-          });
-          if (existingTopic) {
-            throw new Error(`Topic "${topic.name.trim()}" already exists`);
-          }
-
-          const newTopic = await Topic.create({
-            name: topic.name.trim(),
-            questions: topic.questions,
-          });
-          topicId = newTopic.id;
-        }
-
-        const existingSubCategory = await SubCategory.findOne({
-          name: subName.trim(),
-        });
-        if (existingSubCategory) {
-          throw new Error(`Sub-category "${subName.trim()}" already exists`);
-        }
-
-        const newSubCategory = await SubCategory.create({
-          name: subName.trim(),
-          questions: subQuestions,
-          topic: topicId,
-        });
-
-        subCategoryId = newSubCategory.id;
-      }
-
-      // Create Category
-      const existingCategory = await Category.findOne({
-        name: cat.name.trim(),
-      });
-      if (existingCategory) {
-        throw new Error(`Category "${cat.name.trim()}" already exists`);
-      }
-
-      const newCategory = await Category.create({
-        name: cat.name.trim(),
-        questions: cat.questions,
-        subCategory: subCategoryId,
-      });
-
-      return newCategory.id;
-    });
-
-    // Execute all category creation in parallel
-    let categoryIds: string[];
+    // 3. Validate nested uniqueness constraints (in-memory)
     try {
-      categoryIds = await Promise.all(categoryPromises);
-    } catch (err: any) {
-      return res
-        .status(400)
-        .json({ message: err.message || "Failed to create categories" });
+      const catNames = new Set();
+      for (const cat of template.categories) {
+        const catName = cat.name.trim();
+        if (catNames.has(catName))
+          throw new Error(`כפילות שם קטגוריה: '${catName}'`);
+        catNames.add(catName);
+
+        if (cat.subCategories?.length > 10)
+          throw new Error(`לקטגוריה: '${catName}' יש יותר מ10 תתי קטגוריות`);
+
+        const subNames = new Set();
+        for (const sub of cat.subCategories || []) {
+          const subName = sub.name.trim();
+          if (subNames.has(subName))
+            throw new Error(`כפילויות שם תת קטגוריה: '${subName}'`);
+          subNames.add(subName);
+
+          if (sub.topics?.length > 10)
+            throw new Error(`לתת הקטגוריה '${subName}' יש יותר מ10 נושאים`);
+
+          const topicNames = new Set();
+          for (const topic of sub.topics || []) {
+            const topicName = topic.name.trim();
+            if (topicNames.has(topicName))
+              throw new Error(
+                `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`,
+              );
+            topicNames.add(topicName);
+          }
+        }
+      }
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
     }
 
-    // Create final questionnaire template
-    const newTemplate = await QuestionnaireTemp.create({
-      name: nameTrimmed,
-      categories: categoryIds,
-    });
+    // 4. Create the embedded document
+    try {
+      const newTemplate = await QuestionnaireTemp.create({
+        name: trimmedName,
+        categories: template.categories,
+      });
 
-    const populatedTemplate = await QuestionnaireTemp.findById(
-      newTemplate.id,
-    ).populate({
-      path: "categories",
-      populate: {
-        path: "subCategory",
-        populate: {
-          path: "topic",
-        },
-      },
-    });
-
-    return res.status(201).json(populatedTemplate);
+      return res.status(201).json(newTemplate);
+    } catch (err: any) {
+      if (err.code === 11000) {
+        return res.status(400).json({ message: "שם השאלון כבר קיים במערכת" });
+      }
+      return res.status(500).json({
+        message: err.message || "Failed to create questionnaire template",
+      });
+    }
   },
 );
 
@@ -304,258 +259,6 @@ export const getTemplate = asyncHandler(async (req: Request, res: Response) => {
 /**
  * @swagger
  * /api/template/{id}:
- *   put:
- *     summary: Admin updates a questionnaire template including nested categories
- *     tags: [Template]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the template to update
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - template
- *             properties:
- *               template:
- *                 type: object
- *                 required:
- *                   - _id
- *                   - name
- *                   - categories
- *                 properties:
- *                   _id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   categories:
- *                     type: array
- *                     items:
- *                       type: object
- *                       required:
- *                         - _id
- *                         - name
- *                         - questions
- *                       properties:
- *                         _id:
- *                           type: string
- *                         name:
- *                           type: string
- *                         questions:
- *                           type: array
- *                           items:
- *                             type: object
- *                             required:
- *                               - q
- *                               - choice
- *                               - qType
- *                               - required
- *                             properties:
- *                               q:
- *                                 type: string
- *                               choice:
- *                                 type: array
- *                                 items:
- *                                   type: string
- *                               qType:
- *                                 type: string
- *                               required:
- *                                 type: boolean
- *                               answer:
- *                                 type: string
- *                         subCategory:
- *                           type: object
- *                           required:
- *                             - _id
- *                             - name
- *                             - questions
- *                           properties:
- *                             _id:
- *                               type: string
- *                             name:
- *                               type: string
- *                             questions:
- *                               type: array
- *                               items:
- *                                 type: object
- *                                 required:
- *                                   - q
- *                                   - choice
- *                                   - qType
- *                                   - required
- *                                 properties:
- *                                   q:
- *                                     type: string
- *                                   choice:
- *                                     type: array
- *                                     items:
- *                                       type: string
- *                                   qType:
- *                                     type: string
- *                                   required:
- *                                     type: boolean
- *                                   answer:
- *                                     type: string
- *                             topic:
- *                               type: object
- *                               required:
- *                                 - _id
- *                                 - name
- *                                 - questions
- *                               properties:
- *                                 _id:
- *                                   type: string
- *                                 name:
- *                                   type: string
- *                                 questions:
- *                                   type: array
- *                                   items:
- *                                     type: object
- *                                     required:
- *                                       - q
- *                                       - choice
- *                                       - qType
- *                                       - required
- *                                     properties:
- *                                       q:
- *                                         type: string
- *                                       choice:
- *                                         type: array
- *                                         items:
- *                                           type: string
- *                                       qType:
- *                                         type: string
- *                                       required:
- *                                         type: boolean
- *                                       answer:
- *                                         type: string
- *     responses:
- *       200:
- *         description: Template updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 categories:
- *                   type: array
- *                   items:
- *                     type: object
- *                     # Further nested response can be defined as needed
- *       400:
- *         description: Invalid input or update failed
- *       404:
- *         description: Template not found
- *       500:
- *         description: Internal server/database error
- */
-export const updateTemplate = asyncHandler(
-  async (
-    req: Request<{ id: string }, {}, { template: Template }>,
-    res: Response,
-  ) => {
-    const { id } = req.params;
-    const { template } = req.body;
-
-    let existingTemplate = await QuestionnaireTemp.findById(id);
-    if (!existingTemplate) {
-      return res.status(404).json({ message: "Template not found" });
-    }
-
-    const nameTrimmed = template.name.trim();
-    // Validate name
-    const result = questionnaireSchema.safeParse({ name: nameTrimmed });
-    if (!result.success) {
-      const errors = result.error.errors.map((error) => error.message);
-      return res.status(400).json({ message: errors });
-    }
-
-    // Check if questionnaire name already exists
-    existingTemplate = null;
-    existingTemplate = await QuestionnaireTemp.findOne({
-      name: nameTrimmed,
-    });
-    if (existingTemplate && existingTemplate.id !== id) {
-      return res
-        .status(400)
-        .json({ message: "Questionnaire's name already exists" });
-    }
-
-    const updatePromises = template.categories.map(async (cat) => {
-      // Update Category
-      await Category.findByIdAndUpdate(
-        cat.id,
-        {
-          name: cat.name.trim(),
-          questions: cat.questions,
-        },
-        { new: true },
-      );
-
-      if (cat.subCategory) {
-        const sub = cat.subCategory;
-
-        // Update SubCategory
-        await SubCategory.findByIdAndUpdate(
-          sub.id,
-          {
-            name: sub.name.trim(),
-            questions: sub.questions,
-          },
-          { new: true },
-        );
-
-        if (sub.topic) {
-          const topic = sub.topic;
-
-          // Update Topic
-          await Topic.findByIdAndUpdate(
-            topic.id,
-            {
-              name: topic.name.trim(),
-              questions: topic.questions,
-            },
-            { new: true },
-          );
-        }
-      }
-    });
-
-    try {
-      await Promise.all(updatePromises);
-    } catch (err: any) {
-      return res.status(400).json({
-        message: err.message || "Failed to update template structure",
-      });
-    }
-
-    const updatedTemplate = await QuestionnaireTemp.findById(id).populate({
-      path: "categories",
-      populate: {
-        path: "subCategory",
-        populate: {
-          path: "topic",
-        },
-      },
-    });
-
-    return res.status(200).json(updatedTemplate);
-  },
-);
-
-/**
- * @swagger
- * /api/template/{id}:
  *   delete:
  *     summary: Admin deletes a questionnaire template by ID
  *     tags: [Template]
@@ -589,12 +292,3 @@ export const deleteTemplate = asyncHandler(
     return res.status(200).json({ message: "Template deleted successfully" });
   },
 );
-
-/** --------------------  functions --------------------------  */
-
-const createNewTemplate = async (template: Template) => {
-  try {
-  } catch (error) {
-    throw error;
-  }
-};

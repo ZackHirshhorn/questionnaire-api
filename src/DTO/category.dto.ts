@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const categorySchema = z.object({
   name: z
-    .string({ message: "Category's name is required" })
-    .min(2, "Category's name must be at least 2 characters")
-    .max(50, "Category's name must be less than 50 characters")
+    .string({ message: "שם קטגוריה חובה" })
+    .min(2, "שם קטגוריה חייב להכיל לפחות 2 תווים")
+    .max(50, "שם קטגוריה יכול להכיל עד 50 תויים")
     .regex(
-      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z]*[\u0590-\u05FFa-z]+)*$/,
-      "Category's name is not valid",
+      /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
+      "שם קטגוריה לא תקין",
     ),
 });
 export type CategoryDTO = z.infer<typeof categorySchema>;
