@@ -172,6 +172,7 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
     },
   },
   {
+    timestamps: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;
