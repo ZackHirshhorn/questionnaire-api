@@ -7,12 +7,15 @@ import {
   deleteTemplate,
   getAllTemplates,
   searchByName,
+  searchByNameList,
+  getTemplatesList,
 } from "../controllers/templateController";
 
 const router = express.Router();
 
 router.route("/search").get(protect, admin, searchByName);
-
+router.route("/search/list").get(protect, admin, searchByNameList);
+router.route("/list").get(protect, admin, getTemplatesList);
 router
   .route("/")
   .post(protect, admin, createTemplate)

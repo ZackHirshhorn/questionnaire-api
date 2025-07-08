@@ -8,43 +8,14 @@ export interface IQuestion extends Document {
   answer?: string;
 }
 
-const questionSchema = new mongoose.Schema<IQuestion>(
-  {
-    q: {
-      type: String,
-      required: true,
-    },
-    choice: [
-      {
-        type: String,
-      },
-    ],
-    qType: {
-      type: String,
-      required: true,
-    },
-    required: {
-      type: Boolean,
-      required: true,
-    },
-    answer: {
-      type: String,
-    },
-  },
-  {
-    toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-      },
-    },
-  },
-);
+export interface IQuestionsCol extends Document {
+  name: string;
+  questions: IQuestion[];
+}
 
 export interface ITopic extends Document {
   name: string;
-  questions: IQuestion[];
+  questions: string[];
 }
 
 const topicSchema = new mongoose.Schema<ITopic>(
@@ -57,7 +28,12 @@ const topicSchema = new mongoose.Schema<ITopic>(
         "Topic's name is not valid",
       ],
     },
-    questions: [questionSchema],
+    questions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "QuestionsCol",
+      },
+    ],
   },
   {
     toJSON: {
@@ -72,7 +48,7 @@ const topicSchema = new mongoose.Schema<ITopic>(
 
 export interface ISubCategory extends Document {
   name: string;
-  questions: IQuestion[];
+  questions: string[];
   topics?: ITopic[];
 }
 
@@ -86,7 +62,12 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
         "Sub-category's name is not valid",
       ],
     },
-    questions: [questionSchema],
+    questions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "QuestionsCol",
+      },
+    ],
     topics: {
       type: [topicSchema],
       validate: {
@@ -110,7 +91,7 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
 
 export interface ICategory extends Document {
   name: string;
-  questions: IQuestion[];
+  questions: string[];
   subCategories?: ISubCategory[];
 }
 
@@ -124,7 +105,12 @@ const categorySchema = new mongoose.Schema<ICategory>(
         "Category's name is not valid",
       ],
     },
-    questions: [questionSchema],
+    questions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "QuestionsCol",
+      },
+    ],
     subCategories: {
       type: [subCategorySchema],
       validate: {

@@ -186,12 +186,13 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
 questionnaireTempSchema.index({ name: 1 }, { unique: true });
 
 export interface IQuestionnaire extends Document {
-  userId?: string;
+  user?: string;
   userPhone?: string;
-  toke?: string;
   templateId: string;
   template: IQuestionnaireTemp;
   isComplete: boolean;
+  userName?: string;
+  userEmail?: string;
 }
 
 const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
@@ -201,15 +202,19 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
       required: true,
     },
     template: questionnaireTempSchema,
-    userId: {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    userName: {
+      type: String,
+    },
+    userEmail: {
       type: String,
     },
     userPhone: {
       type: String,
       match: [/^[0-9]{9,10}$/, "User's phone number must contain 9-10 digits"],
-    },
-    toke: {
-      type: String,
     },
     isComplete: {
       type: Boolean,

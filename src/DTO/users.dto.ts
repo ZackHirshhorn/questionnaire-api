@@ -18,6 +18,12 @@ export const registerSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
       "הסיסמה חייבת להכיל לפחות אות גדולה אחת, אות קטנה אחת, מספר אחד ותו מיוחד אחד",
     ),
+  phone: z
+    .string()
+    .min(9, "טלפון המשתמש חייב להכיל לפחות 9 ספרות")
+    .max(10, "טלפון המשתמש יכול להכיל עד 10 ספרות")
+    .regex(/^[0-9]{9,10}$/, "טלפון המשתמש אינו תקין")
+    .optional(),
 });
 export type RegisterDTO = z.infer<typeof registerSchema>;
 

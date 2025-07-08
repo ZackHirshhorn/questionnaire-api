@@ -12,7 +12,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "https://question-api-01wm.onrender.com",
+        url: "https://question-api-75d6.onrender.com",
         // url: "http://localhost:5000",
       },
     ],

@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 // Routes
 import authRoutes from "./routes/authRoutes";
 // import usersRoutes from "./routes/usersRoutes";
-import schoolRoutes from "./routes/schoolRoutes";
 import templateRoutes from "./routes/templateRoutes";
 // Middlewares
 import { notFound, errorHandler } from "./middlewares/errorsMiddleware";
@@ -39,7 +38,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/school", schoolRoutes);
 app.use("/api/template", templateRoutes);
 // app.use("/users", usersRoutes);
 setupSwagger(app);
@@ -50,6 +48,6 @@ app.use(errorHandler);
 app.listen(port as number, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
   console.log(
-    `Swagger docs at https://question-api-01wm.onrender.com/api-docs`,
+    `Swagger docs at https://question-api-75d6.onrender.com/api-docs`,
   );
 });
