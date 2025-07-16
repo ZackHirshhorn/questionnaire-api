@@ -2,27 +2,19 @@ import express from "express";
 import { admin, protect } from "../middlewares/authMiddleware";
 import {
   createTemplate,
-  getTemplate,
+  getTemplateById,
   updateTemplate,
   deleteTemplate,
-  getAllTemplates,
   searchByName,
-  searchByNameList,
-  getTemplatesList,
 } from "../controllers/templateController";
 
 const router = express.Router();
 
 router.route("/search").get(protect, admin, searchByName);
-router.route("/search/list").get(protect, admin, searchByNameList);
-router.route("/list").get(protect, admin, getTemplatesList);
-router
-  .route("/")
-  .post(protect, admin, createTemplate)
-  .get(protect, admin, getAllTemplates);
+router.route("/").post(protect, admin, createTemplate);
 router
   .route("/:id")
-  .get(protect, admin, getTemplate)
+  .get(protect, admin, getTemplateById)
   .put(protect, admin, updateTemplate)
   .delete(protect, admin, deleteTemplate);
 

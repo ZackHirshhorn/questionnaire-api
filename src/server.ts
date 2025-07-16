@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
 // import usersRoutes from "./routes/usersRoutes";
 import templateRoutes from "./routes/templateRoutes";
+import questionsRoutes from "./routes/questionsRoutes";
 // Middlewares
 import { notFound, errorHandler } from "./middlewares/errorsMiddleware";
 // Config
@@ -22,12 +23,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "https://frontend-question.onrender.com",
+    // origin: "https://frontend-question.onrender.com",
     credentials: true,
   }),
 );
-
-// app.use(cors());
 
 app.use(cookieParser());
 
@@ -39,6 +38,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/template", templateRoutes);
+app.use("/api/questions", questionsRoutes);
 // app.use("/users", usersRoutes);
 setupSwagger(app);
 

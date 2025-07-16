@@ -44,26 +44,9 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *                           type: string
  *                         questions:
  *                           type: array
+ *                           description: Array of question IDs (ObjectId as string)
  *                           items:
- *                             type: object
- *                             required:
- *                               - q
- *                               - choice
- *                               - qType
- *                               - required
- *                             properties:
- *                               q:
- *                                 type: string
- *                               choice:
- *                                 type: array
- *                                 items:
- *                                   type: string
- *                               qType:
- *                                 type: string
- *                               required:
- *                                 type: boolean
- *                               answer:
- *                                 type: string
+ *                             type: string
  *                         subCategories:
  *                           type: array
  *                           maxItems: 10
@@ -77,26 +60,9 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *                                 type: string
  *                               questions:
  *                                 type: array
+ *                                 description: Array of question IDs (ObjectId as string)
  *                                 items:
- *                                   type: object
- *                                   required:
- *                                     - q
- *                                     - choice
- *                                     - qType
- *                                     - required
- *                                   properties:
- *                                     q:
- *                                       type: string
- *                                     choice:
- *                                       type: array
- *                                       items:
- *                                         type: string
- *                                     qType:
- *                                       type: string
- *                                     required:
- *                                       type: boolean
- *                                     answer:
- *                                       type: string
+ *                                   type: string
  *                               topics:
  *                                 type: array
  *                                 maxItems: 10
@@ -110,26 +76,9 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *                                       type: string
  *                                     questions:
  *                                       type: array
+ *                                       description: Array of question IDs (ObjectId as string)
  *                                       items:
- *                                         type: object
- *                                         required:
- *                                           - q
- *                                           - choice
- *                                           - qType
- *                                           - required
- *                                         properties:
- *                                           q:
- *                                             type: string
- *                                           choice:
- *                                             type: array
- *                                             items:
- *                                               type: string
- *                                           qType:
- *                                             type: string
- *                                           required:
- *                                             type: boolean
- *                                           answer:
- *                                             type: string
+ *                                         type: string
  *     responses:
  *       201:
  *         description: Template created successfully and template object
@@ -138,6 +87,7 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *       500:
  *         description: Internal server/database error
  */
+
 export const createTemplate = asyncHandler(
   async (req: Request<{}, {}, { template: Template }>, res: Response) => {
     const { template } = req.body;
@@ -257,22 +207,34 @@ export const createTemplate = asyncHandler(
  *       500:
  *         description: Internal server error
  */
-export const getTemplate = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const template = await QuestionnaireTemp.findById(id).populate({
-    path: "categories",
-    populate: {
-      path: "subCategory",
-      populate: {
-        path: "topic",
-      },
-    },
-  });
-  if (!template) {
-    throw new Error("Template not found");
-  }
-  return res.status(200).json({ template });
-});
+export const getTemplateById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const template = await QuestionnaireTemp.findById(id)
+      .populate({
+        path: "categories.questions",
+        populate: {
+          path: "questions",
+          // model: 'Question',
+        },
+      })
+      .populate({
+        path: "categories.subCategories.questions",
+        populate: {
+          path: "questions",
+          // model: 'Question',
+        },
+      })
+      .populate({
+        path: "categories.subCategories.topics.questions",
+        populate: {
+          path: "questions",
+          // model: 'Question',
+        },
+      });
+    return res.status(200).json(template);
+  },
+);
 
 /**
  * @swagger
@@ -440,147 +402,7 @@ export const updateTemplate = asyncHandler(
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Question:
- *       type: object
- *       properties:
- *         q:
- *           type: string
- *         choice:
- *           type: array
- *           items:
- *             type: string
- *         qType:
- *           type: string
- *         required:
- *           type: boolean
- *         answer:
- *           type: string
- *         id:
- *           type: string
-
- *     Topic:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         questions:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Question'
- *         id:
- *           type: string
-
- *     SubCategory:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         questions:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Question'
- *         topics:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Topic'
- *         id:
- *           type: string
-
- *     Category:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         questions:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Question'
- *         subCategories:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/SubCategory'
- *         id:
- *           type: string
-
- *     Template:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         categories:
- *           type: array
- *           items:
- *             $ref: '#/components/schemas/Category'
- *         id:
- *           type: string
-
  * /api/template:
- *   get:
- *     summary: Admin get all questionnaire templates (paginated)
- *     tags: [Template]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number (starts at 1)
- *       - in: query
- *         name: pageSize
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of templates per page
- *     responses:
- *       200:
- *         description: Successfully retrieved paginated templates
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 total:
- *                   type: integer
- *                   description: Total number of templates in the database
- *                 page:
- *                   type: integer
- *                 pageSize:
- *                   type: integer
- *                 totalPages:
- *                   type: integer
- *                   description: Total number of pages
- *                 templates:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Template'
- *       500:
- *         description: Internal server error
- */
-export const getAllTemplates = asyncHandler(
-  async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
-    const skip = (page - 1) * pageSize;
-
-    const [templates, total] = await Promise.all([
-      QuestionnaireTemp.find().skip(skip).limit(pageSize),
-      QuestionnaireTemp.countDocuments(),
-    ]);
-    return res.status(200).json({
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      templates,
-    });
-  },
-);
-
-/**
- * @swagger
- * /api/templates/list:
  *   get:
  *     summary: Get a paginated list of templates (id, name)
  *     tags:
@@ -640,7 +462,7 @@ export const getAllTemplates = asyncHandler(
  *                   type: string
  *                   example: Internal server error
  */
-export const getTemplatesList = asyncHandler(
+export const getTemplates = asyncHandler(
   async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
@@ -663,56 +485,6 @@ export const getTemplatesList = asyncHandler(
 /**
  * @swagger
  * /api/template/search:
- *   get:
- *     summary: Admin search questionnaire templates by any name (template/category/subcategory/topic)
- *     tags: [Template]
- *     parameters:
- *       - in: query
- *         name: value
- *         required: true
- *         schema:
- *           type: string
- *         description: Search term to match against template, category, subcategory, or topic names (case-insensitive)
- *     responses:
- *       200:
- *         description: Successfully retrieved matching templates
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Template'
- *       400:
- *         description: Missing search value
- *       500:
- *         description: Internal server error
- */
-export const searchByName = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { value } = req.query;
-
-    if (!value || typeof value !== "string") {
-      return res.status(400).json({ message: "ערך לא תקין" });
-    }
-
-    const regex = new RegExp(value.trim(), "i");
-
-    const templates = await QuestionnaireTemp.find({
-      $or: [
-        { name: regex },
-        { "categories.name": regex },
-        { "categories.subCategories.name": regex },
-        { "categories.subCategories.topics.name": regex },
-      ],
-    });
-    // need to return only id and name
-    return res.status(200).json(templates);
-  },
-);
-
-/**
- * @swagger
- * /api/templates/search/list:
  *   get:
  *     summary: Search templates by name or nested category values
  *     tags:
@@ -762,7 +534,7 @@ export const searchByName = asyncHandler(
  *                   type: string
  *                   example: Internal server error
  */
-export const searchByNameList = asyncHandler(
+export const searchByName = asyncHandler(
   async (req: Request, res: Response) => {
     const { value } = req.query;
 

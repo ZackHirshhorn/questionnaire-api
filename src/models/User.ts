@@ -10,7 +10,6 @@ export interface IUser extends Document {
   id?: string;
   name: string;
   email: string;
-  phone?: string;
   password: string;
   role: Role;
   matchPassword: (enteredPassword: string) => Promise<boolean>;
@@ -29,10 +28,6 @@ const userSchema = new mongoose.Schema<IUser>(
     email: {
       type: String,
       required: true,
-    },
-    phone: {
-      type: String,
-      match: [/^[0-9]{9,10}$/, "User's phone number must contain 9-10 digits"],
     },
     password: {
       type: String,
