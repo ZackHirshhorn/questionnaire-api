@@ -8,6 +8,6 @@ import {
 const router = express.Router();
 
 router.route("/").post(createQuestionnaire);
-router.route("/user/:userId").get(getQuestionnairesByUser);
+router.route("/user").get(protect, getQuestionnairesByUser);
 
 export default router;

@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes";
 // import usersRoutes from "./routes/usersRoutes";
 import templateRoutes from "./routes/templateRoutes";
 import questionsRoutes from "./routes/questionsRoutes";
+import questionnaireRoutes from "./routes/questionnaireRoutes";
 // Middlewares
 import { notFound, errorHandler } from "./middlewares/errorsMiddleware";
 // Config
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/template", templateRoutes);
 app.use("/api/questions", questionsRoutes);
+app.use("/api/questionnaire", questionnaireRoutes);
 // app.use("/users", usersRoutes);
 setupSwagger(app);
 

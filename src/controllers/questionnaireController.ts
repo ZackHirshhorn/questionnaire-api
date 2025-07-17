@@ -57,95 +57,55 @@ interface AuthenticatedRequest extends Request {
 export const createQuestionnaire = asyncHandler(
   async (req: Request, res: Response) => {
     const { templateId } = req.body;
-    const template = await QuestionnaireTemp.findById(templateId);
+    const template = await QuestionnaireTemp.findById(templateId)
+      .populate({
+        path: "categories.questions",
+        model: "QuestionsCol",
+        populate: {
+          path: "questions",
+          model: "Question",
+        },
+      })
+      .populate({
+        path: "categories.subCategories.questions",
+        model: "QuestionsCol",
+        populate: {
+          path: "questions",
+          model: "Question",
+        },
+      })
+      .populate({
+        path: "categories.subCategories.topics.questions",
+        model: "QuestionsCol",
+        populate: {
+          path: "questions",
+          model: "Question",
+        },
+      });
     if (!template) {
       throw new Error("השאלון לא קיים");
     }
+    // Map QuestionsCol => raw questions array
+    const transformedTemplate = JSON.parse(JSON.stringify(template)); // shallow clone
+    for (const category of transformedTemplate.categories) {
+      category.questions = category.questions.flatMap(
+        (qc: any) => qc.questions || [],
+      );
+      for (const sub of category.subCategories || []) {
+        sub.questions = sub.questions.flatMap((qc: any) => qc.questions || []);
+        for (const topic of sub.topics || []) {
+          topic.questions = topic.questions.flatMap(
+            (qc: any) => qc.questions || [],
+          );
+        }
+      }
+    }
     const questionnaire = await Questionnaire.create({
       templateId,
-      template,
+      template: transformedTemplate,
       isComplete: false,
     });
-  },
-);
-
-/**
- * @swagger
- * /api/questionnaire/{qId}:
- *   put:
- *     summary: Update an existing questionnaire by ID
- *     tags:
- *       - Questionnaire
- *     parameters:
- *       - in: path
- *         name: qId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the questionnaire to update
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               ansQuestionnaire:
- *                 type: object
- *                 required:
- *                   - isComplete
- *                   - template
- *                 properties:
- *                   isComplete:
- *                     type: boolean
- *                     description: Whether the questionnaire is complete
- *                   userName:
- *                     type: string
- *                   userEmail:
- *                     type: string
- *                   userPhone:
- *                     type: string
- *                   template:
- *                     $ref: '#/components/schemas/QuestionnaireTemplate'
- *     responses:
- *       200:
- *         description: The updated questionnaire
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Questionnaire'
- *       404:
- *         description: Questionnaire not found
- *       500:
- *         description: Internal server error
- */
-export const updateQuestionnaire = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const { qId } = req.params;
-    const { ansQuestionnaire } = req.body;
-
-    const questionnaire = await Questionnaire.findById(qId);
-    if (!questionnaire) {
-      throw new Error("שאלון לא קיים");
-    }
-    if (req.user) {
-      questionnaire.user = req.user.id;
-      questionnaire.userName = req.user.name;
-      questionnaire.userEmail = req.user.email;
-      questionnaire.userPhone = req.user.phone;
-      questionnaire.isComplete = ansQuestionnaire.isComplete;
-      questionnaire.template = ansQuestionnaire.template;
-      const updateQuestionnaire = await questionnaire.save();
-      return res.status(200).json(updateQuestionnaire);
-    } else {
-      questionnaire.userName = ansQuestionnaire.userName || null;
-      questionnaire.userEmail = ansQuestionnaire.userEmail || null;
-      questionnaire.userPhone = ansQuestionnaire.userPhone || null;
-      questionnaire.isComplete = ansQuestionnaire.isComplete;
-      questionnaire.template = ansQuestionnaire.template;
-      const updateQuestionnaire = await questionnaire.save();
-      return res.status(200).json(updateQuestionnaire);
-    }
+    return res.status(201).json(questionnaire);
   },
 );
 
@@ -196,10 +156,22 @@ export const updateQuestionnaire = asyncHandler(
 export const getQuestionnairesByUser = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     if (req.user) {
-      const questionnaires = await Questionnaire.find({ user: req.user.id });
+      const questionnaires = await Questionnaire.find({
+        user: req.user.id,
+      }).select("name _id");
       return res.status(200).json(questionnaires);
     } else {
       throw new Error("המשתמש לא קיים");
+    }
+  },
+);
+
+export const updateByAuthUser = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const questionnaire = await Questionnaire.findById(id);
+    if (!questionnaire) {
+      throw new Error("שאלון לא קיים");
     }
   },
 );

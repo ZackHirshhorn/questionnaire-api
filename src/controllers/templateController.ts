@@ -215,21 +215,18 @@ export const getTemplateById = asyncHandler(
         path: "categories.questions",
         populate: {
           path: "questions",
-          // model: 'Question',
         },
       })
       .populate({
         path: "categories.subCategories.questions",
         populate: {
           path: "questions",
-          // model: 'Question',
         },
       })
       .populate({
         path: "categories.subCategories.topics.questions",
         populate: {
           path: "questions",
-          // model: 'Question',
         },
       });
     return res.status(200).json(template);
