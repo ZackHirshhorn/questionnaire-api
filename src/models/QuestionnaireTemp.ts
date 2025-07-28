@@ -38,7 +38,6 @@ const topicSchema = new mongoose.Schema<ITopic>(
   {
     toJSON: {
       transform(doc, ret) {
-        ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
       },
@@ -81,7 +80,6 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
   {
     toJSON: {
       transform(doc, ret) {
-        ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
       },
@@ -124,7 +122,6 @@ const categorySchema = new mongoose.Schema<ICategory>(
   {
     toJSON: {
       transform(doc, ret) {
-        ret.id = ret._id;
         delete ret._id;
         delete ret.__v;
       },

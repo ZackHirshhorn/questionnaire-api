@@ -166,12 +166,278 @@ export const getQuestionnairesByUser = asyncHandler(
   },
 );
 
-export const updateByAuthUser = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
+/**
+ * @swagger
+ * /api/questionnaire/{id}:
+ *   get:
+ *     summary: Get a specific questionnaire by ID
+ *     tags:
+ *       - Questionnaire
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the questionnaire to retrieve
+ *         example: 64cdf1234ab56c78de90f123
+ *     responses:
+ *       200:
+ *         description: Questionnaire retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: 64cdf1234ab56c78de90f123
+ *                 name:
+ *                   type: string
+ *                   example: Customer Satisfaction Survey
+ *                 categories:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: Service Quality
+ *                       questions:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["How would you rate our service?", "Was our staff helpful?"]
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2025-07-20T14:30:00Z
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2025-07-25T10:00:00Z
+ *       404:
+ *         description: Questionnaire not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: שאלון לא קיים
+ *       500:
+ *         description: Server error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ */
+export const getQuestionnairesById = asyncHandler(
+  async (req: Request, res: Response) => {
     const { id } = req.params;
     const questionnaire = await Questionnaire.findById(id);
     if (!questionnaire) {
       throw new Error("שאלון לא קיים");
     }
+    return res.status(200).json(questionnaire);
+  },
+);
+
+/**
+ * @swagger
+ * /api/questionnaire/{id}/answer/auth:
+ *   put:
+ *     summary: Update a questionnaire by the authenticated user
+ *     description: Saves answers, phone number, and completion status for a questionnaire, linking it to the authenticated user.
+ *     tags:
+ *       - Questionnaire
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the questionnaire to update
+ *         example: 64cdf1234ab56c78de90f123
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ansTemplate:
+ *                 type: object
+ *                 description: The updated answer template
+ *                 example:
+ *                   categories:
+ *                     - name: Service
+ *                       questions:
+ *                         - q: How was the experience?
+ *                           answer: Great
+ *               uPhone:
+ *                 type: string
+ *                 description: The phone number of the user
+ *                 example: "+972501234567"
+ *               isComplete:
+ *                 type: boolean
+ *                 description: Whether the questionnaire is marked complete
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Questionnaire updated successfully (no content returned)
+ *       404:
+ *         description: Questionnaire not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: שאלון לא קיים
+ *       401:
+ *         description: Unauthorized - missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Server error during questionnaire update
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ */
+export const updateByAuthUser = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const { ansTemplate, uPhone, isComplete } = req.body;
+    const questionnaire = await Questionnaire.findById(id);
+    if (!questionnaire) {
+      throw new Error("שאלון לא קיים");
+    }
+    questionnaire.user = req.user ? req.user.id : undefined;
+    questionnaire.userName = req.user ? req.user.name : undefined;
+    questionnaire.userEmail = req.user ? req.user.email : undefined;
+    questionnaire.template = ansTemplate;
+    questionnaire.userPhone = uPhone || null;
+    questionnaire.isComplete = isComplete || questionnaire.isComplete;
+    const saved = await questionnaire.save();
+    return res.status(200).json(saved);
+  },
+);
+
+/**
+ * @swagger
+ * /api/questionnaire/{id}/answer:
+ *   put:
+ *     summary: Update a questionnaire
+ *     tags:
+ *       - Questionnaire
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the questionnaire to update
+ *         example: 64cdf1234ab56c78de90f123
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               uName:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "John Doe"
+ *               uEmail:
+ *                 type: string
+ *                 nullable: true
+ *                 format: email
+ *                 example: "john.doe@example.com"
+ *               uPhone:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "+972501234567"
+ *               isComplete:
+ *                 type: boolean
+ *                 example: true
+ *               ansTemplate:
+ *                 type: object
+ *                 description: The answer structure with categories and questions
+ *                 example:
+ *                   categories:
+ *                     - name: Service Quality
+ *                       questions:
+ *                         - q: "How would you rate the service?"
+ *                           answer: "Excellent"
+ *     responses:
+ *       200:
+ *         description: Questionnaire updated successfully
+ *       404:
+ *         description: Questionnaire not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: שאלון לא קיים
+ *       400:
+ *         description: Invalid request body or parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: בקשה לא תקינה
+ *       500:
+ *         description: Server error occurred during questionnaire update
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ */
+export const updateQuestionnaire = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { ansTemplate, uName, uEmail, uPhone, isComplete } = req.body;
+    const questionnaire = await Questionnaire.findById(id);
+    if (!questionnaire) {
+      throw new Error("שאלון לא קיים");
+    }
+    questionnaire.userName = uName || null;
+    questionnaire.userEmail = uEmail || null;
+    questionnaire.template = ansTemplate;
+    questionnaire.userPhone = uPhone || null;
+    questionnaire.isComplete = isComplete || questionnaire.isComplete;
+    await questionnaire.save();
+    return res.status(200);
   },
 );

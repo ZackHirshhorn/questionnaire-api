@@ -87,7 +87,6 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *       500:
  *         description: Internal server/database error
  */
-
 export const createTemplate = asyncHandler(
   async (req: Request<{}, {}, { template: Template }>, res: Response) => {
     const { template } = req.body;
