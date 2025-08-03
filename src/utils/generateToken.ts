@@ -9,12 +9,17 @@ const generateToken = (res: Response, userId: string) => {
   });
 
   // Set JWT as an HTTP-Only cookie
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
-    sameSite: "lax",
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  });
+  try {
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+  } catch (error) {
+    console.error("Error setting cookie:", error);
+    throw error; // Re-throw the error to be caught by the global error handler
+  }
 };
 
 export default generateToken;
