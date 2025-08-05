@@ -43,11 +43,12 @@ const userSchema = new mongoose.Schema<IUser>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.password;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        obj.id = obj._id;
+        delete obj._id;
+        delete obj.password;
+        delete obj.__v;
       },
     },
   },

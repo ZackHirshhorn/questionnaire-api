@@ -5,7 +5,6 @@ import User, { Role } from "../../../models/User";
 const agent = request.agent(app);
 
 it("returns 201 on successful creating questions collection", async () => {
-
   // 1) Log in with the agent
   const registerRes = await agent
     .post("/api/auth")
@@ -34,7 +33,7 @@ it("returns 201 on successful creating questions collection", async () => {
     .expect(200);
   expect(loginRes.get("Set-Cookie")).toBeDefined();
 
-  const res = await agent
+  await agent
     .post("/api/questions")
     .send({
       colName: "אסופת שאלות",
@@ -44,9 +43,9 @@ it("returns 201 on successful creating questions collection", async () => {
           q: "שאלה 2",
           qType: "multiple choice",
           choice: ["א", "ב", "ג", "ד"],
-          required: true
-        }
-      ]
+          required: true,
+        },
+      ],
     })
     .expect(201);
 });

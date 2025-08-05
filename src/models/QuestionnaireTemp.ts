@@ -15,7 +15,7 @@ export interface IQuestionsCol extends Document {
 
 export interface ITopic extends Document {
   name: string;
-  questions: string[];
+  questions: mongoose.Types.ObjectId[];
 }
 
 const topicSchema = new mongoose.Schema<ITopic>(
@@ -37,9 +37,10 @@ const topicSchema = new mongoose.Schema<ITopic>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -79,9 +80,10 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -121,9 +123,10 @@ const categorySchema = new mongoose.Schema<ICategory>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -157,10 +160,11 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        obj.id = obj._id;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },

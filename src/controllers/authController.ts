@@ -87,7 +87,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     generateToken(res, user.id);
 
     res.status(201).json({
-      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -164,7 +163,6 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     generateToken(res, user.id);
 
     res.json({
-      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,

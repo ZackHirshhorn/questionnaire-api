@@ -33,10 +33,10 @@ const questionSchema = new mongoose.Schema<IQuestion>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -61,10 +61,10 @@ const topicSchema = new mongoose.Schema<ITopic>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -99,10 +99,10 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -137,10 +137,10 @@ const categorySchema = new mongoose.Schema<ICategory>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -174,10 +174,11 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        obj.id = obj._id;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -186,7 +187,7 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
 questionnaireTempSchema.index({ name: 1 }, { unique: true });
 
 export interface IQuestionnaire extends Document {
-  user?: string;
+  user?: mongoose.Types.ObjectId;
   userPhone?: string;
   templateId: string;
   template: IQuestionnaireTemp;
@@ -224,10 +225,11 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        obj.id = obj._id;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -235,7 +237,6 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
 
 questionnaireSchema.index({ name: 1 }, { unique: true });
 questionnaireSchema.index({ user: 1 });
-questionnaireSchema.index({ school: 1 });
 
 const Questionnaire = mongoose.model<IQuestionnaire>(
   "Questionnaire",

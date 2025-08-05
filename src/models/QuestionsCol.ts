@@ -33,9 +33,10 @@ const questionSchema = new mongoose.Schema<IQuestion>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },
@@ -56,10 +57,11 @@ const questionsColSchema = new mongoose.Schema<IQuestionsCol>(
   },
   {
     toJSON: {
-      transform(doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
+      transform(_doc: any, ret: any) {
+        const obj = ret as any;
+        obj.id = obj._id;
+        delete obj._id;
+        delete obj.__v;
       },
     },
   },

@@ -3,6 +3,7 @@ import asyncHandler from "../middlewares/asyncHandler";
 import Questionnaire from "../models/Questionnaire";
 import QuestionnaireTemp from "../models/QuestionnaireTemp";
 import { IUser } from "../models/User";
+import mongoose from "mongoose";
 
 interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -332,7 +333,9 @@ export const updateByAuthUser = asyncHandler(
     if (!questionnaire) {
       throw new Error("שאלון לא קיים");
     }
-    questionnaire.user = req.user ? req.user.id : undefined;
+    questionnaire.user = req.user
+      ? new mongoose.Types.ObjectId(req.user.id)
+      : undefined;
     questionnaire.userName = req.user ? req.user.name : undefined;
     questionnaire.userEmail = req.user ? req.user.email : undefined;
     questionnaire.template = ansTemplate;

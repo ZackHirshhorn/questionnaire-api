@@ -47,6 +47,8 @@ const whitelist = [
 //   }),
 // );
 
+app.use(cors());
+
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
