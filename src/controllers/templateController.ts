@@ -400,7 +400,7 @@ export const updateTemplate = asyncHandler(
  * @swagger
  * /api/template:
  *   get:
- *     summary: Get a paginated list of templates (id, name)
+ *     summary: Super Admin Get a paginated list of templates (id, name)
  *     tags:
  *       - Template
  *     parameters:

@@ -1,34 +1,52 @@
 import request from "supertest";
 import { app } from "../../../app";
+import User, { Role } from "../../../models/User";
 
-it("return 201 on successful creating questions collection", async () => {
-  const agent = request.agent(app);
+const agent = request.agent(app);
 
-  // 1) agent logs in, stores the cookie internally
-  await agent
+it("returns 201 on successful creating questions collection", async () => {
+
+  // 1) Log in with the agent
+  const registerRes = await agent
     .post("/api/auth")
     .send({
       name: "אדמין",
       email: "admin@admin.com",
       password: "A123456a!",
-      role: "ADMIN",
     })
     .expect(201);
 
-  // 2) agent will automatically send that cookie on subsequent calls
-  await agent
+  expect(registerRes.get("Set-Cookie")).toBeDefined();
+
+  const user = await User.findOne({ email: "admin@admin.com" });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  user.role = Role.Admin;
+  await user.save();
+
+  const loginRes = await agent
+    .post("/api/auth/login")
+    .send({
+      email: "admin@admin.com",
+      password: "A123456a!",
+    })
+    .expect(200);
+  expect(loginRes.get("Set-Cookie")).toBeDefined();
+
+  const res = await agent
     .post("/api/questions")
     .send({
       colName: "אסופת שאלות",
       questions: [
-        { q: "שאלה 1", qType: "open", required: true },
+        { q: "שאלה 1", qType: "open", required: true },
         {
-          q: "שאלה 2",
+          q: "שאלה 2",
           qType: "multiple choice",
           choice: ["א", "ב", "ג", "ד"],
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     })
     .expect(201);
 });

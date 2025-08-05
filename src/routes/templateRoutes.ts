@@ -1,5 +1,5 @@
 import express from "express";
-import { admin, protect } from "../middlewares/authMiddleware";
+import { admin, protect, superAdmin } from "../middlewares/authMiddleware";
 import {
   createTemplate,
   getTemplateById,
@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.route("/search").get(protect, admin, searchByName);
+router.route("/search").get(protect, superAdmin, searchByName);
 router.route("/").post(protect, admin, createTemplate);
 router
   .route("/:id")

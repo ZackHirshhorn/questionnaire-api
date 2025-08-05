@@ -54,13 +54,12 @@ import { registerSchema, loginSchema } from "../dto/users.dto";
  *         description: Database error
  */
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password } = req.body;
 
   const result = registerSchema.safeParse({
     email: email?.trim() || "",
     password: password?.trim() || "",
     name: name?.trim() || "",
-    phone: phone?.trim() || "",
   });
   if (!result.success) {
     const errors = [];
@@ -171,8 +170,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       role: user.role,
     });
   } else {
-    res.status(401);
-    throw new Error("איימייל או סיסמא לא תקינים");
+    res.status(400).json({ message: "איימייל או סיסמא לא תקינים" });
   }
 });
 

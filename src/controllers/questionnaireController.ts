@@ -111,7 +111,7 @@ export const createQuestionnaire = asyncHandler(
 
 /**
  * @swagger
- * /api/questionnaire/user/{userId}:
+ * /api/questionnaire/user:
  *   get:
  *     summary: Get questionnaires for a specific user or the authenticated user.
  *     tags:

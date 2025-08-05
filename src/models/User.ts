@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 export enum Role {
   Admin = "ADMIN",
   User = "USER",
+  SuperAdmin = "SUPER_ADMIN",
 }
 
 export interface IUser extends Document {

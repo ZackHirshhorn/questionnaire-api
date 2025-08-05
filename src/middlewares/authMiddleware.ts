@@ -46,3 +46,14 @@ export const admin = asyncHandler(
     }
   },
 );
+
+export const superAdmin = asyncHandler(
+  (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (req.user && req.user.role === "SUPER_ADMIN") {
+      next();
+    } else {
+      res.status(401);
+      throw new Error("No authorized as super admin");
+    }
+  },
+);
