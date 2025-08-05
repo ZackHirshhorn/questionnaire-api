@@ -4,5 +4,4 @@ export type SubCategory = {
   name: string;
   questions: string[];
   topics?: Topic[];
-  id?: string;
 };
