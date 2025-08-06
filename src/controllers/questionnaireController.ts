@@ -114,7 +114,7 @@ export const createQuestionnaire = asyncHandler(
  * @swagger
  * /api/questionnaire/user:
  *   get:
- *     summary: Get questionnaires for a specific user or the authenticated user.
+ *     summary: Get questionnaires for the authenticated user.
  *     tags:
  *       - Questionnaire
  *     responses:
@@ -127,26 +127,15 @@ export const createQuestionnaire = asyncHandler(
  *               items:
  *                 type: object
  *                 properties:
- *                   id:
+ *                   _id:
  *                     type: string
- *                   templateId:
- *                     type: string
- *                   user:
+ *                     example: "64f123abc456def7890abc12"
+ *                   template:
  *                     type: object
- *                   userPhone:
- *                     type: string
- *                   userName:
- *                     type: string
- *                   userEmail:
- *                     type: string
- *                   isComplete:
- *                     type: boolean
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                   updatedAt:
- *                     type: string
- *                     format: date-time
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Health and Wellness Survey"
  *       400:
  *         description: Bad request
  *       404:
@@ -159,7 +148,7 @@ export const getQuestionnairesByUser = asyncHandler(
     if (req.user) {
       const questionnaires = await Questionnaire.find({
         user: req.user.id,
-      }).select("name _id");
+      }).select("template.name _id");
       return res.status(200).json(questionnaires);
     } else {
       throw new Error("המשתמש לא קיים");
