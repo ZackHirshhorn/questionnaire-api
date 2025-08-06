@@ -482,7 +482,7 @@ export const getTemplates = asyncHandler(
  * @swagger
  * /api/template/search:
  *   get:
- *     summary: Search templates by name or nested category values
+ *     summary: Super Admin Search templates by name or nested category values
  *     tags:
  *       - Template
  *     parameters:
@@ -490,25 +490,56 @@ export const getTemplates = asyncHandler(
  *         name: value
  *         schema:
  *           type: string
- *         required: true
+ *         required: false
  *         description: The search keyword to match against template names or categories
  *         example: health
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         required: false
+ *         description: Page number for pagination (default is 1)
+ *         example: 2
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         required: false
+ *         description: Number of items per page (default is 20)
+ *         example: 10
  *     responses:
  *       200:
  *         description: Matching templates returned successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     example: "64eec95d2f937a5fd14596b2"
- *                   name:
- *                     type: string
- *                     example: "Health and Wellness Survey"
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: integer
+ *                   example: 85
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 20
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
+ *                 templates:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "64eec95d2f937a5fd14596b2"
+ *                       name:
+ *                         type: string
+ *                         example: "Health and Wellness Survey"
  *       400:
  *         description: Invalid or missing search value
  *         content:
@@ -533,21 +564,48 @@ export const getTemplates = asyncHandler(
 export const searchByName = asyncHandler(
   async (req: Request, res: Response) => {
     const { value } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 20;
+    const skip = (page - 1) * pageSize;
+
+    let templates = null;
+    let total = null;
 
     if (!value || typeof value !== "string") {
-      return res.status(400).json({ message: "ערך לא תקין" });
+      templates = await QuestionnaireTemp.find({})
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionnaireTemp.countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        templates,
+      });
+    } else {
+      const regex = new RegExp(value.trim(), "i");
+
+      templates = await QuestionnaireTemp.find({
+        $or: [
+          { name: regex },
+          { "categories.name": regex },
+          { "categories.subCategories.name": regex },
+          { "categories.subCategories.topics.name": regex },
+        ],
+      })
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionnaireTemp.countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        templates,
+      });
     }
-
-    const regex = new RegExp(value.trim(), "i");
-
-    const templates = await QuestionnaireTemp.find({
-      $or: [
-        { name: regex },
-        { "categories.name": regex },
-        { "categories.subCategories.name": regex },
-        { "categories.subCategories.topics.name": regex },
-      ],
-    }).select("name _id");
-    return res.status(200).json(templates);
   },
 );
