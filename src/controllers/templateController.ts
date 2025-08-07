@@ -7,6 +7,11 @@ import { subCategorySchema } from "../dto/subCategory.dto";
 import { topicSchema } from "../dto/topic.dto";
 import { Template } from "../types/template";
 import { ICategory } from "../models/QuestionnaireTemp";
+import { IUser } from "../models/User";
+
+interface AuthenticatedRequest extends Request {
+  user?: IUser;
+}
 
 /**
  * @swagger
@@ -88,7 +93,7 @@ import { ICategory } from "../models/QuestionnaireTemp";
  *         description: Internal server/database error
  */
 export const createTemplate = asyncHandler(
-  async (req: Request<{}, {}, { template: Template }>, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { template } = req.body;
     const trimmedName = template.name.trim();
 
@@ -162,6 +167,7 @@ export const createTemplate = asyncHandler(
       const newTemplate = await QuestionnaireTemp.create({
         name: trimmedName,
         categories: template.categories,
+        user: req.user?.id,
       });
 
       return res.status(201).json(newTemplate);
@@ -400,7 +406,7 @@ export const updateTemplate = asyncHandler(
  * @swagger
  * /api/template:
  *   get:
- *     summary: Super Admin Get a paginated list of templates (id, name)
+ *     summary: Super Admin Get a paginated list of all templates (id, name)
  *     tags:
  *       - Template
  *     parameters:
@@ -458,14 +464,99 @@ export const updateTemplate = asyncHandler(
  *                   type: string
  *                   example: Internal server error
  */
-export const getTemplates = asyncHandler(
-  async (req: Request, res: Response) => {
+export const getAllTemplates = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
     const skip = (page - 1) * pageSize;
 
     const [templates, total] = await Promise.all([
       QuestionnaireTemp.find().skip(skip).limit(pageSize).select("name _id"),
+      QuestionnaireTemp.countDocuments(),
+    ]);
+    return res.status(200).json({
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      templates,
+    });
+  },
+);
+
+/**
+ * @swagger
+ * /api/template/user:
+ *   get:
+ *     summary: Admin Get a paginated list of his own templates (id, name)
+ *     tags:
+ *       - Template
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: List of templates returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total:
+ *                   type: integer
+ *                   example: 42
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 10
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 5
+ *                 templates:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "64eec95d2f937a5fd14596b2"
+ *                       name:
+ *                         type: string
+ *                         example: "Customer Satisfaction Survey"
+ *       500:
+ *         description: Server error occurred
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ */
+export const getTemplatesByUser = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const skip = (page - 1) * pageSize;
+
+    const [templates, total] = await Promise.all([
+      QuestionnaireTemp.find({ user: req.user?.id })
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id"),
       QuestionnaireTemp.countDocuments(),
     ]);
     return res.status(200).json({

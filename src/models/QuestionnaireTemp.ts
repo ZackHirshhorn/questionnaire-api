@@ -135,6 +135,7 @@ const categorySchema = new mongoose.Schema<ICategory>(
 export interface IQuestionnaireTemp extends Document {
   name: string;
   categories: ICategory[];
+  user: mongoose.Schema.Types.ObjectId;
 }
 
 const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
@@ -146,6 +147,10 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
         /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
         "Questionnaire template name is not valid",
       ],
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     categories: {
       type: [categorySchema],

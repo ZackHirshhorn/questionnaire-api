@@ -38,7 +38,10 @@ export const protect = asyncHandler(
 
 export const admin = asyncHandler(
   (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (req.user && req.user.role === "ADMIN") {
+    if (
+      (req.user && req.user.role === "ADMIN") ||
+      (req.user && req.user.role === "SUPER_ADMIN")
+    ) {
       next();
     } else {
       res.status(401);
