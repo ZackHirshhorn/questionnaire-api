@@ -170,8 +170,6 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
   },
 );
 
-questionnaireTempSchema.index({ name: 1 }, { unique: true });
-
 const QuestionnaireTemp = mongoose.model<IQuestionnaireTemp>(
   "QuestionnaireTemp",
   questionnaireTempSchema,

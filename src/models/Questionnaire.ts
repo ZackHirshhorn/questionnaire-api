@@ -235,7 +235,6 @@ const questionnaireSchema = new mongoose.Schema<IQuestionnaire>(
   },
 );
 
-questionnaireSchema.index({ name: 1 }, { unique: true });
 questionnaireSchema.index({ user: 1 });
 
 const Questionnaire = mongoose.model<IQuestionnaire>(
