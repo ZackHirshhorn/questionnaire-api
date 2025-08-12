@@ -216,24 +216,12 @@ export const getTemplateById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const template = await QuestionnaireTemp.findById(id)
-      .populate({
-        path: "categories.questions",
-        populate: {
-          path: "questions",
-        },
-      })
-      .populate({
-        path: "categories.subCategories.questions",
-        populate: {
-          path: "questions",
-        },
-      })
-      .populate({
-        path: "categories.subCategories.topics.questions",
-        populate: {
-          path: "questions",
-        },
-      });
+      .select("name user categories -_id")
+      .populate([
+        { path: "categories.questions", select: "name" },
+        { path: "categories.subCategories.questions", select: "name" },
+        { path: "categories.subCategories.topics.questions", select: "name" },
+      ]);
     return res.status(200).json(template);
   },
 );
@@ -393,7 +381,10 @@ export const updateTemplate = asyncHandler(
 
     try {
       const updated = await existing.save();
-      return res.status(200).json(updated);
+      return res.status(200).json({
+        name: updated.name,
+        id: updated.id,
+      });
     } catch (err: any) {
       return res.status(500).json({
         message: err.message || "Failed to update questionnaire template",
