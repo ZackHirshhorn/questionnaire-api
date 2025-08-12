@@ -129,43 +129,76 @@ export const createQuestionsCol = asyncHandler(
  * @swagger
  * /api/questions/search:
  *   get:
- *     summary: Admin Search question collections by name
+ *     summary: Admin search question collections (paginated)
  *     tags:
  *       - Questions
  *     parameters:
  *       - in: query
  *         name: value
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
- *         description: Partial or full name of the question collection to search
+ *         description: >
+ *           Partial or full collection name to search.
+ *           If omitted, returns all collections (paginated).
  *         example: Feedback
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number (1-based)
+ *       - in: query
+ *         name: pageSize
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 20
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of matching question collections
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: 64cda2a7e0ef1c02a9a055e3
- *                   name:
- *                     type: string
- *                     example: Customer Feedback Set
- *       400:
- *         description: Invalid or missing search value
+ *         description: Success — paginated list of matching collections
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: ערך לא תקין
+ *                 total:
+ *                   type: integer
+ *                   example: 125
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 20
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 7
+ *                 collection:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: 64cda2a7e0ef1c02a9a055e3
+ *                       name:
+ *                         type: string
+ *                         example: Customer Feedback Set
+ *             examples:
+ *               sample:
+ *                 value:
+ *                   total: 125
+ *                   page: 1
+ *                   pageSize: 20
+ *                   totalPages: 7
+ *                   collection:
+ *                     - _id: 64cda2a7e0ef1c02a9a055e3
+ *                       name: Customer Feedback Set
  *       500:
  *         description: Server error occurred during search
  *         content:
@@ -180,16 +213,44 @@ export const createQuestionsCol = asyncHandler(
 export const searchByName = asyncHandler(
   async (req: Request, res: Response) => {
     const { value } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 20;
+    const skip = (page - 1) * pageSize;
+
+    let collection = null;
+    let total = null;
 
     if (!value || typeof value !== "string") {
-      return res.status(400).json({ message: "ערך לא תקין" });
+      collection = await QuestionsCol.find({})
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionsCol.countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        collection,
+      });
+    } else {
+      const regex = new RegExp(value.trim(), "i");
+      collection = await QuestionsCol.find({
+        name: regex,
+      })
+        .select("name _id")
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionsCol.countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        collection,
+      });
     }
-
-    const regex = new RegExp(value.trim(), "i");
-    const questionCols = await QuestionsCol.find({
-      name: regex,
-    }).select("name _id");
-    return res.status(200).json(questionCols);
   },
 );
 

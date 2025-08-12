@@ -543,7 +543,7 @@ export const getTemplatesByUser = asyncHandler(
  *                   items:
  *                     type: object
  *                     properties:
- *                       _id:
+ *                       id:
  *                         type: string
  *                         example: "64eec95d2f937a5fd14596b2"
  *                       name:
