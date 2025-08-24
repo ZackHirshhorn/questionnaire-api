@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
 
+export enum qType {
+  Text = "Text",
+  Multiple = "Multiple",
+  Single = "Single",
+  Number = "Number"
+}
+
 export interface IQuestion extends Document {
   q: string;
   choice: string[];
-  qType: string;
+  qType: qType;
   required: boolean;
   answer?: string;
 }
@@ -21,6 +28,8 @@ const questionSchema = new mongoose.Schema<IQuestion>(
     ],
     qType: {
       type: String,
+      enum: Object.values(qType),
+      default: qType.Text,
       required: true
     },
     required: {

@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
 
+export enum qType {
+  Text = "Text",
+  Multiple = "Multiple",
+  Single = "Single",
+  Number = "Number"
+}
+
 export interface IQuestion extends Document {
   q: string;
   choice: string[];
-  qType: string;
+  qType: qType;
   required: boolean;
   answer?: string;
 }
@@ -25,15 +32,15 @@ const topicSchema = new mongoose.Schema<ITopic>(
       required: true,
       match: [
         /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
-        "Topic's name is not valid",
-      ],
+        "Topic's name is not valid"
+      ]
     },
     questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "QuestionsCol",
-      },
-    ],
+        ref: "QuestionsCol"
+      }
+    ]
   },
   {
     toJSON: {
@@ -41,9 +48,9 @@ const topicSchema = new mongoose.Schema<ITopic>(
         const obj = ret as any;
         delete obj._id;
         delete obj.__v;
-      },
-    },
-  },
+      }
+    }
+  }
 );
 
 export interface ISubCategory extends Document {
@@ -59,14 +66,14 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
       required: true,
       match: [
         /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
-        "Sub-category's name is not valid",
-      ],
+        "Sub-category's name is not valid"
+      ]
     },
     questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "QuestionsCol",
-      },
+        ref: "QuestionsCol"
+      }
     ],
     topics: {
       type: [topicSchema],
@@ -74,9 +81,9 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
         validator: function (arr: ITopic[]) {
           return arr.length <= 10;
         },
-        message: "A sub category can have at most 10 topics",
-      },
-    },
+        message: "A sub category can have at most 10 topics"
+      }
+    }
   },
   {
     toJSON: {
@@ -84,9 +91,9 @@ const subCategorySchema = new mongoose.Schema<ISubCategory>(
         const obj = ret as any;
         delete obj._id;
         delete obj.__v;
-      },
-    },
-  },
+      }
+    }
+  }
 );
 
 export interface ICategory extends Document {
@@ -102,14 +109,14 @@ const categorySchema = new mongoose.Schema<ICategory>(
       required: true,
       match: [
         /^[\u0590-\u05FFA-Z]+(?:[ '"\u0590-\u05FFa-z0-9]*[\u0590-\u05FFa-z0-9]+)*$/,
-        "Category's name is not valid",
-      ],
+        "Category's name is not valid"
+      ]
     },
     questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "QuestionsCol",
-      },
+        ref: "QuestionsCol"
+      }
     ],
     subCategories: {
       type: [subCategorySchema],
@@ -117,9 +124,9 @@ const categorySchema = new mongoose.Schema<ICategory>(
         validator: function (arr: ISubCategory[]) {
           return arr.length <= 10;
         },
-        message: "A category can have at most 10 sub-categories",
-      },
-    },
+        message: "A category can have at most 10 sub-categories"
+      }
+    }
   },
   {
     toJSON: {
@@ -127,9 +134,9 @@ const categorySchema = new mongoose.Schema<ICategory>(
         const obj = ret as any;
         delete obj._id;
         delete obj.__v;
-      },
-    },
-  },
+      }
+    }
+  }
 );
 
 export interface IQuestionnaireTemp extends Document {
@@ -145,12 +152,12 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
       required: true,
       match: [
         /^[\u0590-\u05FFA-Z](?:[\u0590-\u05FF a-z0-9]*[\u0590-\u05FFa-z0-9])?$/,
-        "Questionnaire template name is not valid",
-      ],
+        "Questionnaire template name is not valid"
+      ]
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "User"
     },
     categories: {
       type: [categorySchema],
@@ -158,9 +165,9 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
         validator: function (arr: ICategory[]) {
           return arr.length <= 10;
         },
-        message: "A questionnaire can have at most 10 categories",
-      },
-    },
+        message: "A questionnaire can have at most 10 categories"
+      }
+    }
   },
   {
     timestamps: true,
@@ -170,14 +177,14 @@ const questionnaireTempSchema = new mongoose.Schema<IQuestionnaireTemp>(
         obj.id = obj._id;
         delete obj._id;
         delete obj.__v;
-      },
-    },
-  },
+      }
+    }
+  }
 );
 
 const QuestionnaireTemp = mongoose.model<IQuestionnaireTemp>(
   "QuestionnaireTemp",
-  questionnaireTempSchema,
+  questionnaireTempSchema
 );
 
 export default QuestionnaireTemp;
