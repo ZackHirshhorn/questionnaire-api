@@ -1,5 +1,5 @@
 import express from "express";
-import { admin, protect } from "../middlewares/authMiddleware";
+import { admin, protect, superAdmin } from "../middlewares/authMiddleware";
 
 import {
   createQuestionsCol,
@@ -13,7 +13,7 @@ import {
 const router = express.Router();
 
 router.route("/").post(protect, admin, createQuestionsCol);
-router.route("/search").get(protect, admin, searchByName);
+router.route("/search").get(protect, superAdmin, searchByName);
 router.route("/user").get(protect, admin, getQuestionsColByUser);
 router
   .route("/:id")

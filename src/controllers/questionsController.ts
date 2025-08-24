@@ -134,7 +134,7 @@ export const createQuestionsCol = asyncHandler(
  * @swagger
  * /api/questions/search:
  *   get:
- *     summary: Admin search question collections (paginated)
+ *     summary: Super Admin search question collections (paginated)
  *     tags:
  *       - Questions
  *     parameters:
