@@ -512,13 +512,20 @@ export const deleteQuestionsCol = asyncHandler(
  * @swagger
  * /api/questions/user:
  *   get:
- *     summary: Get the Admin's question collections (paginated)
- *     description: Returns a paginated list of the Admin's question collections, limited to `id` and `name`.
- *     tags: [Questions Collections]
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
+ *     summary: Get the Admin's question collections (paginated, optional search)
+ *     description: >
+ *       Returns a paginated list of the authenticated Admin's question collections, limited to `_id` and `name`.
+ *       If `value` is provided, a case-insensitive search is applied to `name`.
+ *       **Note:** `total` reflects the count of all the user's collections (not the filtered count when `value` is used).
+ *     tags: [Questions]
  *     parameters:
+ *       - in: query
+ *         name: value
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Optional case-insensitive search string applied to the collection name.
+ *         example: "life"
  *       - in: query
  *         name: page
  *         schema:
@@ -542,7 +549,7 @@ export const deleteQuestionsCol = asyncHandler(
  *             schema:
  *               $ref: '#/components/schemas/PaginatedQuestionsCols'
  *             examples:
- *               sample:
+ *               withoutSearch:
  *                 value:
  *                   total: 42
  *                   page: 1
@@ -553,6 +560,15 @@ export const deleteQuestionsCol = asyncHandler(
  *                       name: "Lifestyle"
  *                     - id: "66c0b8f0f2a5b1c12345678a"
  *                       name: "Medical History"
+ *               withSearch:
+ *                 value:
+ *                   total: 42
+ *                   page: 1
+ *                   pageSize: 20
+ *                   totalPages: 3
+ *                   collection:
+ *                     - _id: "66c0b8e7f2a5b1c123456789"
+ *                       name: "Life Events"
  *       401:
  *         description: Unauthorized (missing or invalid authentication).
  *       500:
@@ -562,7 +578,7 @@ export const deleteQuestionsCol = asyncHandler(
  *   schemas:
  *     QuestionsColSummary:
  *       type: object
- *       required: [id, name]
+ *       required: [_id, name]
  *       properties:
  *         id:
  *           type: string
@@ -593,25 +609,44 @@ export const deleteQuestionsCol = asyncHandler(
  */
 export const getQuestionsColByUser = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
+    const { value } = req.query;
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 20;
     const skip = (page - 1) * pageSize;
 
-    const collection = await QuestionsCol.find({ user: req.user?.id })
-      .select("name _id")
-      .skip(skip)
-      .limit(pageSize);
+    let collection = null;
+    let total = null;
 
-    const total = await QuestionsCol.find({
-      user: req.user?.id
-    }).countDocuments();
-
-    res.status(200).json({
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      collection
-    });
+    if (!value || typeof value !== "string") {
+      collection = await QuestionsCol.find({ user: req.user?.id })
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        collection
+      });
+    } else {
+      const regex = new RegExp(value.trim(), "i");
+      collection = await QuestionsCol.find({
+        user: req.user?.id,
+        name: regex
+      })
+        .select("name _id")
+        .skip(skip)
+        .limit(pageSize);
+      total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        collection
+      });
+    }
   }
 );
