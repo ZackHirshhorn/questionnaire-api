@@ -104,12 +104,6 @@ export const createTemplate = asyncHandler(
       return res.status(400).json({ message: errors });
     }
 
-    // 2. Check if template name already exists
-    const existing = await QuestionnaireTemp.findOne({ name: trimmedName });
-    if (existing) {
-      throw new Error("שם השאלון כבר קיים");
-    }
-
     // 3. Validate nested uniqueness constraints (in-memory)
     try {
       const catNames = new Set();
@@ -152,7 +146,7 @@ export const createTemplate = asyncHandler(
             }
             if (topicNames.has(topicName))
               throw new Error(
-                `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`,
+                `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`
               );
             topicNames.add(topicName);
           }
@@ -167,19 +161,19 @@ export const createTemplate = asyncHandler(
       const newTemplate = await QuestionnaireTemp.create({
         name: trimmedName,
         categories: template.categories,
-        user: req.user?.id,
+        user: req.user?.id
       });
 
       return res.status(201).json(newTemplate);
     } catch (err: any) {
       if (err.code === 11000) {
-        return res.status(400).json({ message: "שם השאלון כבר קיים במערכת" });
+        return res.status(400).json({ message: "שגיאה ביצירת השאלון" });
       }
       return res.status(500).json({
-        message: err.message || "Failed to create questionnaire template",
+        message: err.message || "Failed to create questionnaire template"
       });
     }
-  },
+  }
 );
 
 /**
@@ -220,10 +214,10 @@ export const getTemplateById = asyncHandler(
       .populate([
         { path: "categories.questions", select: "name" },
         { path: "categories.subCategories.questions", select: "name" },
-        { path: "categories.subCategories.topics.questions", select: "name" },
+        { path: "categories.subCategories.topics.questions", select: "name" }
       ]);
     return res.status(200).json(template);
-  },
+  }
 );
 
 /**
@@ -260,7 +254,7 @@ export const deleteTemplate = asyncHandler(
     const { id } = req.params;
     await QuestionnaireTemp.findByIdAndDelete(id);
     return res.status(200).json({ message: "Template deleted successfully" });
-  },
+  }
 );
 
 /**
@@ -295,7 +289,7 @@ export const deleteTemplate = asyncHandler(
 export const updateTemplate = asyncHandler(
   async (
     req: Request<{ id: string }, {}, { template: Template }>,
-    res: Response,
+    res: Response
   ) => {
     const { id } = req.params;
     const { template } = req.body;
@@ -312,15 +306,6 @@ export const updateTemplate = asyncHandler(
     const existing = await QuestionnaireTemp.findById(id);
     if (!existing) {
       return res.status(404).json({ message: "שאלון לא קיים" });
-    }
-
-    // Ensure no duplicate template name (other than itself)
-    const conflict = await QuestionnaireTemp.findOne({
-      _id: { $ne: id },
-      name: trimmedName,
-    });
-    if (conflict) {
-      return res.status(400).json({ message: "שם השאלון כבר קיים במערכת" });
     }
 
     // Validate nested structure
@@ -365,7 +350,7 @@ export const updateTemplate = asyncHandler(
             }
             if (topicNames.has(topicName))
               throw new Error(
-                `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`,
+                `כפילויות בתת קטגוריה '${subName}': תחת השם: '${topicName}'`
               );
             topicNames.add(topicName);
           }
@@ -383,14 +368,14 @@ export const updateTemplate = asyncHandler(
       const updated = await existing.save();
       return res.status(200).json({
         name: updated.name,
-        id: updated.id,
+        id: updated.id
       });
     } catch (err: any) {
       return res.status(500).json({
-        message: err.message || "Failed to update questionnaire template",
+        message: err.message || "Failed to update questionnaire template"
       });
     }
-  },
+  }
 );
 
 /**
@@ -466,16 +451,16 @@ export const getTemplatesByUser = asyncHandler(
         .skip(skip)
         .limit(pageSize)
         .select("name _id"),
-      QuestionnaireTemp.countDocuments(),
+      QuestionnaireTemp.countDocuments()
     ]);
     return res.status(200).json({
       total,
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize),
-      templates,
+      templates
     });
-  },
+  }
 );
 
 /**
@@ -582,7 +567,7 @@ export const searchByName = asyncHandler(
         page,
         pageSize,
         totalPages: Math.ceil(total / pageSize),
-        templates,
+        templates
       });
     } else {
       const regex = new RegExp(value.trim(), "i");
@@ -592,8 +577,8 @@ export const searchByName = asyncHandler(
           { name: regex },
           { "categories.name": regex },
           { "categories.subCategories.name": regex },
-          { "categories.subCategories.topics.name": regex },
-        ],
+          { "categories.subCategories.topics.name": regex }
+        ]
       })
         .skip(skip)
         .limit(pageSize)
@@ -604,8 +589,8 @@ export const searchByName = asyncHandler(
         page,
         pageSize,
         totalPages: Math.ceil(total / pageSize),
-        templates,
+        templates
       });
     }
-  },
+  }
 );

@@ -111,20 +111,17 @@ interface AuthenticatedRequest extends Request {
  *                   example: Internal server error
  */
 export const createQuestionsCol = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { colName, questions } = req.body;
     const result = questionColSchema.safeParse({ name: colName.trim() });
     if (!result.success) {
       const errors = result.error.errors.map((err) => err.message);
       return res.status(400).json({ message: errors });
     }
-    const existing = await QuestionsCol.findOne({ name: colName.trim() });
-    if (existing) {
-      throw new Error("שם אסופת השאלות כבר קיים");
-    }
     const newQuestionCol = await QuestionsCol.create({
       name: colName.trim(),
-      questions
+      questions,
+      user: req.user?.id
     });
     res.status(201).json(newQuestionCol);
   }
