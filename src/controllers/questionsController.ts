@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import asyncHandler from "../middlewares/asyncHandler";
 import QuestionsCol from "../models/QuestionsCol";
 import { questionColSchema } from "../dto/questionCol";
+import { IUser } from "../models/User";
+
+interface AuthenticatedRequest extends Request {
+  user?: IUser;
+}
 
 /**
  * @swagger
@@ -119,10 +124,10 @@ export const createQuestionsCol = asyncHandler(
     }
     const newQuestionCol = await QuestionsCol.create({
       name: colName.trim(),
-      questions,
+      questions
     });
     res.status(201).json(newQuestionCol);
-  },
+  }
 );
 
 /**
@@ -231,27 +236,26 @@ export const searchByName = asyncHandler(
         page,
         pageSize,
         totalPages: Math.ceil(total / pageSize),
-        collection,
+        collection
       });
     } else {
       const regex = new RegExp(value.trim(), "i");
       collection = await QuestionsCol.find({
-        name: regex,
+        name: regex
       })
         .select("name _id")
         .skip(skip)
-        .limit(pageSize)
-        .select("name _id");
+        .limit(pageSize);
       total = await QuestionsCol.countDocuments();
       return res.status(200).json({
         total,
         page,
         pageSize,
         totalPages: Math.ceil(total / pageSize),
-        collection,
+        collection
       });
     }
-  },
+  }
 );
 
 /**
@@ -328,7 +332,7 @@ export const getQuestionsColById = asyncHandler(
     const { id } = req.params;
     const questionsCol = await QuestionsCol.findById(id);
     res.status(200).json(questionsCol);
-  },
+  }
 );
 
 /**
@@ -449,7 +453,7 @@ export const updatedQuestionsCol = asyncHandler(
     const updated = await existing.save();
 
     res.status(200).json(updated);
-  },
+  }
 );
 
 /**
@@ -504,5 +508,113 @@ export const deleteQuestionsCol = asyncHandler(
     const { id } = req.params;
     await QuestionsCol.findByIdAndDelete(id);
     res.status(200).json({ message: "אסופת השאלות נמחקה בהצלחה" });
-  },
+  }
+);
+
+/**
+ * @swagger
+ * /api/questions/user:
+ *   get:
+ *     summary: Get the Admin's question collections (paginated)
+ *     description: Returns a paginated list of the Admin's question collections, limited to `id` and `name`.
+ *     tags: [Questions Collections]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: 1-based page index.
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
+ *         description: Number of items per page.
+ *     responses:
+ *       200:
+ *         description: Paginated question collections of the Admin user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginatedQuestionsCols'
+ *             examples:
+ *               sample:
+ *                 value:
+ *                   total: 42
+ *                   page: 1
+ *                   pageSize: 20
+ *                   totalPages: 3
+ *                   collection:
+ *                     - id: "66c0b8e7f2a5b1c123456789"
+ *                       name: "Lifestyle"
+ *                     - id: "66c0b8f0f2a5b1c12345678a"
+ *                       name: "Medical History"
+ *       401:
+ *         description: Unauthorized (missing or invalid authentication).
+ *       500:
+ *         description: Server error.
+ *
+ * components:
+ *   schemas:
+ *     QuestionsColSummary:
+ *       type: object
+ *       required: [id, name]
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: MongoDB ObjectId.
+ *           example: "66c0b8e7f2a5b1c123456789"
+ *         name:
+ *           type: string
+ *           example: "General Health"
+ *     PaginatedQuestionsCols:
+ *       type: object
+ *       properties:
+ *         total:
+ *           type: integer
+ *           example: 42
+ *         page:
+ *           type: integer
+ *           example: 1
+ *         pageSize:
+ *           type: integer
+ *           example: 20
+ *         totalPages:
+ *           type: integer
+ *           example: 3
+ *         collection:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/QuestionsColSummary'
+ */
+export const getQuestionsColByUser = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 20;
+    const skip = (page - 1) * pageSize;
+
+    const collection = await QuestionsCol.find({ user: req.user?.id })
+      .select("name _id")
+      .skip(skip)
+      .limit(pageSize);
+
+    const total = await QuestionsCol.find({
+      user: req.user?.id
+    }).countDocuments();
+
+    res.status(200).json({
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      collection
+    });
+  }
 );
