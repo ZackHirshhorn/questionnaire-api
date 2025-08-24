@@ -112,7 +112,7 @@ interface AuthenticatedRequest extends Request {
  */
 export const createQuestionsCol = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { colName, questions } = req.body;
+    const { colName, questions, description } = req.body;
     const result = questionColSchema.safeParse({ name: colName.trim() });
     if (!result.success) {
       const errors = result.error.errors.map((err) => err.message);
@@ -121,7 +121,8 @@ export const createQuestionsCol = asyncHandler(
     const newQuestionCol = await QuestionsCol.create({
       name: colName.trim(),
       questions,
-      user: req.user?.id
+      user: req.user?.id,
+      description: description ? description.trim() : ""
     });
     res.status(201).json(newQuestionCol);
   }
