@@ -11,7 +11,7 @@ it("returns 201 on successful creating questions collection", async () => {
     .send({
       name: "אדמין",
       email: "admin@admin.com",
-      password: "A123456a!",
+      password: "A123456a!"
     })
     .expect(201);
 
@@ -28,7 +28,7 @@ it("returns 201 on successful creating questions collection", async () => {
     .post("/api/auth/login")
     .send({
       email: "admin@admin.com",
-      password: "A123456a!",
+      password: "A123456a!"
     })
     .expect(200);
   expect(loginRes.get("Set-Cookie")).toBeDefined();
@@ -43,9 +43,9 @@ it("returns 201 on successful creating questions collection", async () => {
           q: "שאלה 2",
           qType: "multiple choice",
           choice: ["א", "ב", "ג", "ד"],
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     })
     .expect(201);
 });

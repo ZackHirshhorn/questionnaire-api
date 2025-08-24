@@ -8,21 +8,21 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: "Questionnaire API",
       version: "1.0.0",
-      description: "API documentation for the Questionnaire API",
+      description: "API documentation for the Questionnaire API"
     },
     servers: [
       {
-        // url: "https://question-api-75d6.onrender.com",
-        url: "http://localhost:5000",
-      },
-    ],
+        url: "https://question-api-75d6.onrender.com"
+        // url: "http://localhost:5000",
+      }
+    ]
   },
   apis: [
     "./src/routes/*.ts",
     "./src/controllers/*.ts",
     "./dist/routes/*.js",
-    "./dist/controllers/*.js",
-  ],
+    "./dist/controllers/*.js"
+  ]
 };
 
 const swaggerSpec = swaggerJsdoc(options);
@@ -34,8 +34,8 @@ export function setupSwagger(app: Express) {
     swaggerUi.setup(swaggerSpec, {
       swaggerOptions: {
         withCredentials: true,
-        persistAuthorization: true,
-      },
-    }),
+        persistAuthorization: true
+      }
+    })
   );
 }
