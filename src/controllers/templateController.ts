@@ -382,25 +382,41 @@ export const updateTemplate = asyncHandler(
  * @swagger
  * /api/template/user:
  *   get:
- *     summary: Admin Get a paginated list of his own templates (id, name)
+ *     summary: Get a paginated list of your templates (id, name), with optional search
+ *     description: >
+ *       Returns templates belonging to the authenticated user.
+ *       If `value` is provided, a case-insensitive partial match is applied to
+ *       `name`, `categories.name`, `categories.subCategories.name`, and
+ *       `categories.subCategories.topics.name`.
  *     tags:
  *       - Template
  *     parameters:
  *       - in: query
+ *         name: value
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Optional search string (case-insensitive).
+ *         example: "sales"
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 1
- *         description: Page number for pagination
+ *         description: Page number for pagination.
  *       - in: query
  *         name: pageSize
  *         schema:
  *           type: integer
- *           default: 10
- *         description: Number of items per page
+ *           minimum: 1
+ *           default: 20
+ *         description: Number of items per page.
  *     responses:
  *       200:
- *         description: List of templates returned successfully
+ *         description: >
+ *           List of templates returned successfully.
+ *           Note: `total` is the count of all the user's templates, even when a search `value` is used.
  *         content:
  *           application/json:
  *             schema:
@@ -414,10 +430,10 @@ export const updateTemplate = asyncHandler(
  *                   example: 1
  *                 pageSize:
  *                   type: integer
- *                   example: 10
+ *                   example: 20
  *                 totalPages:
  *                   type: integer
- *                   example: 5
+ *                   example: 3
  *                 templates:
  *                   type: array
  *                   items:
@@ -442,24 +458,55 @@ export const updateTemplate = asyncHandler(
  */
 export const getTemplatesByUser = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
+    const { value } = req.query;
     const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const pageSize = parseInt(req.query.pageSize as string) || 20;
     const skip = (page - 1) * pageSize;
 
-    const [templates, total] = await Promise.all([
-      QuestionnaireTemp.find({ user: req.user?.id })
+    let templates = null;
+    let total = null;
+
+    if (!value || typeof value !== "string") {
+      templates = await QuestionnaireTemp.find({ user: req.user?.id })
         .skip(skip)
         .limit(pageSize)
-        .select("name _id"),
-      QuestionnaireTemp.countDocuments()
-    ]);
-    return res.status(200).json({
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      templates
-    });
+        .select("name _id");
+      total = await QuestionnaireTemp.find({
+        user: req.user?.id
+      }).countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        templates
+      });
+    } else {
+      const regex = new RegExp(value.trim(), "i");
+
+      templates = await QuestionnaireTemp.find({
+        user: req.user?.id,
+        $or: [
+          { name: regex },
+          { "categories.name": regex },
+          { "categories.subCategories.name": regex },
+          { "categories.subCategories.topics.name": regex }
+        ]
+      })
+        .skip(skip)
+        .limit(pageSize)
+        .select("name _id");
+      total = await QuestionnaireTemp.find({
+        user: req.user?.id
+      }).countDocuments();
+      return res.status(200).json({
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        templates
+      });
+    }
   }
 );
 
