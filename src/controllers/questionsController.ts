@@ -227,7 +227,7 @@ export const searchByName = asyncHandler(
       collection = await QuestionsCol.find({})
         .skip(skip)
         .limit(pageSize)
-        .select("name _id");
+        .select("name description _id");
       total = await QuestionsCol.countDocuments();
       return res.status(200).json({
         total,
@@ -241,7 +241,7 @@ export const searchByName = asyncHandler(
       collection = await QuestionsCol.find({
         name: regex
       })
-        .select("name _id")
+        .select("name description _id")
         .skip(skip)
         .limit(pageSize);
       total = await QuestionsCol.countDocuments();
@@ -440,13 +440,16 @@ export const getQuestionsColById = asyncHandler(
 export const updatedQuestionsCol = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { colName, questions } = req.body;
+    const { colName, questions, description } = req.body;
 
     const existing = await QuestionsCol.findById(id);
     if (!existing) throw new Error("אסופת שאלות זו לא קיימת");
 
     existing.name = colName ? colName.trim() : existing.name;
     existing.questions = questions ? questions : existing.questions;
+    existing.description = description
+      ? description.trim()
+      : existing.description;
 
     const updated = await existing.save();
 
@@ -622,7 +625,7 @@ export const getQuestionsColByUser = asyncHandler(
       collection = await QuestionsCol.find({ user: req.user?.id })
         .skip(skip)
         .limit(pageSize)
-        .select("name _id");
+        .select("name description _id");
       total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();
       return res.status(200).json({
         total,
@@ -637,7 +640,7 @@ export const getQuestionsColByUser = asyncHandler(
         user: req.user?.id,
         name: regex
       })
-        .select("name _id")
+        .select("name description _id")
         .skip(skip)
         .limit(pageSize);
       total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();
