@@ -122,7 +122,8 @@ export const createQuestionsCol = asyncHandler(
       name: colName.trim(),
       questions,
       user: req.user?.id,
-      description: description ? description.trim() : ""
+      description: description ? description.trim() : "",
+      size: questions ? questions.length : 0
     });
     res.status(201).json(newQuestionCol);
   }
@@ -227,7 +228,7 @@ export const searchByName = asyncHandler(
       collection = await QuestionsCol.find({})
         .skip(skip)
         .limit(pageSize)
-        .select("name description _id");
+        .select("name description size _id");
       total = await QuestionsCol.countDocuments();
       return res.status(200).json({
         total,
@@ -241,7 +242,7 @@ export const searchByName = asyncHandler(
       collection = await QuestionsCol.find({
         name: regex
       })
-        .select("name description _id")
+        .select("name description size _id")
         .skip(skip)
         .limit(pageSize);
       total = await QuestionsCol.countDocuments();
@@ -450,6 +451,7 @@ export const updatedQuestionsCol = asyncHandler(
     existing.description = description
       ? description.trim()
       : existing.description;
+    existing.size = questions ? questions.length : 0;
 
     const updated = await existing.save();
 
@@ -625,7 +627,7 @@ export const getQuestionsColByUser = asyncHandler(
       collection = await QuestionsCol.find({ user: req.user?.id })
         .skip(skip)
         .limit(pageSize)
-        .select("name description _id");
+        .select("name description size _id");
       total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();
       return res.status(200).json({
         total,
@@ -640,7 +642,7 @@ export const getQuestionsColByUser = asyncHandler(
         user: req.user?.id,
         name: regex
       })
-        .select("name description _id")
+        .select("name description size _id")
         .skip(skip)
         .limit(pageSize);
       total = await QuestionsCol.find({ user: req.user?.id }).countDocuments();

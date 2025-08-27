@@ -56,6 +56,7 @@ export interface IQuestionsCol extends Document {
   questions: IQuestion[];
   description: string;
   user: mongoose.Types.ObjectId;
+  size: number;
 }
 
 const questionsColSchema = new mongoose.Schema<IQuestionsCol>(
@@ -72,7 +73,10 @@ const questionsColSchema = new mongoose.Schema<IQuestionsCol>(
       ref: "User",
       required: true
     },
-    questions: [questionSchema]
+    questions: [questionSchema],
+    size: {
+      type: Number
+    }
   },
   {
     toJSON: {
