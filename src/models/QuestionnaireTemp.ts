@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { randomUUID } from "crypto";
 
 export enum qType {
   Text = "Text",
@@ -13,6 +14,7 @@ export interface IQuestion extends Document {
   qType: qType;
   required: boolean;
   answer?: string;
+  id: string;
 }
 
 export interface IQuestionsCol extends Document {

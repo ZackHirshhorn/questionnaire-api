@@ -64,24 +64,24 @@ export const createQuestionnaire = asyncHandler(
         model: "QuestionsCol",
         populate: {
           path: "questions",
-          model: "Question",
-        },
+          model: "Question"
+        }
       })
       .populate({
         path: "categories.subCategories.questions",
         model: "QuestionsCol",
         populate: {
           path: "questions",
-          model: "Question",
-        },
+          model: "Question"
+        }
       })
       .populate({
         path: "categories.subCategories.topics.questions",
         model: "QuestionsCol",
         populate: {
           path: "questions",
-          model: "Question",
-        },
+          model: "Question"
+        }
       });
     if (!template) {
       throw new Error("השאלון לא קיים");
@@ -90,13 +90,13 @@ export const createQuestionnaire = asyncHandler(
     const transformedTemplate = JSON.parse(JSON.stringify(template)); // shallow clone
     for (const category of transformedTemplate.categories) {
       category.questions = category.questions.flatMap(
-        (qc: any) => qc.questions || [],
+        (qc: any) => qc.questions || []
       );
       for (const sub of category.subCategories || []) {
         sub.questions = sub.questions.flatMap((qc: any) => qc.questions || []);
         for (const topic of sub.topics || []) {
           topic.questions = topic.questions.flatMap(
-            (qc: any) => qc.questions || [],
+            (qc: any) => qc.questions || []
           );
         }
       }
@@ -104,10 +104,10 @@ export const createQuestionnaire = asyncHandler(
     const questionnaire = await Questionnaire.create({
       templateId,
       template: transformedTemplate,
-      isComplete: false,
+      isComplete: false
     });
     return res.status(201).json(questionnaire);
-  },
+  }
 );
 
 /**
@@ -147,13 +147,13 @@ export const getQuestionnairesByUser = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     if (req.user) {
       const questionnaires = await Questionnaire.find({
-        user: req.user.id,
+        user: req.user.id
       }).select("template.name _id");
       return res.status(200).json(questionnaires);
     } else {
       throw new Error("המשתמש לא קיים");
     }
-  },
+  }
 );
 
 /**
@@ -235,7 +235,7 @@ export const getQuestionnairesById = asyncHandler(
       throw new Error("שאלון לא קיים");
     }
     return res.status(200).json(questionnaire);
-  },
+  }
 );
 
 /**
@@ -332,7 +332,7 @@ export const updateByAuthUser = asyncHandler(
     questionnaire.isComplete = isComplete || questionnaire.isComplete;
     const saved = await questionnaire.save();
     return res.status(200).json(saved);
-  },
+  }
 );
 
 /**
@@ -431,5 +431,5 @@ export const updateQuestionnaire = asyncHandler(
     questionnaire.isComplete = isComplete || questionnaire.isComplete;
     await questionnaire.save();
     return res.status(200);
-  },
+  }
 );

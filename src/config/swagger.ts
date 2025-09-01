@@ -12,8 +12,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "https://question-api-75d6.onrender.com"
-        // url: "http://localhost:5000",
+        // url: "https://question-api-75d6.onrender.com"
+        url: "http://localhost:5000"
       }
     ]
   },

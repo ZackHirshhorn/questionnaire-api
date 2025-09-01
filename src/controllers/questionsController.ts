@@ -12,9 +12,11 @@ interface AuthenticatedRequest extends Request {
  * @swagger
  * /api/questions:
  *   post:
- *     summary: Admin Create a new question collection
- *     tags:
- *       - Questions
+ *     summary: Admin — create a new question collection
+ *     tags: [Questions]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -28,55 +30,39 @@ interface AuthenticatedRequest extends Request {
  *               colName:
  *                 type: string
  *                 example: Customer Feedback Set
+ *               description:
+ *                 type: string
+ *                 example: A basic CSAT questionnaire for new customers
  *               questions:
  *                 type: array
  *                 description: List of question objects
  *                 items:
- *                   type: object
- *                   properties:
- *                     q:
- *                       type: string
- *                       example: How satisfied are you with the service?
- *                     choice:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied"]
- *                     qType:
- *                       type: string
- *                       example: multiple-choice
- *                     required:
- *                       type: boolean
- *                       example: true
+ *                   $ref: '#/components/schemas/QuestionInput'
  *     responses:
  *       201:
  *         description: Question collection created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 60e44d556ad3e63f8c05d515
- *                 name:
- *                   type: string
- *                   example: Customer Feedback Set
- *                 questions:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       q:
- *                         type: string
- *                       choice:
- *                         type: array
- *                         items:
- *                           type: string
- *                       qType:
- *                         type: string
- *                       required:
- *                         type: boolean
+ *               $ref: '#/components/schemas/QuestionsCol'
+ *             examples:
+ *               created:
+ *                 value:
+ *                   id: 60e44d556ad3e63f8c05d515
+ *                   name: Customer Feedback Set
+ *                   description: A basic CSAT questionnaire for new customers
+ *                   user: 66cf2a2b7b3a1a0012ab34cd
+ *                   size: 2
+ *                   questions:
+ *                     - id: 66cf2b9b7b3a1a0012ab34ce
+ *                       q: How satisfied are you with the service?
+ *                       choice: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied"]
+ *                       qType: Multiple
+ *                       required: true
+ *                     - id: 66cf2b9b7b3a1a0012ab34cf
+ *                       q: What could we improve?
+ *                       qType: Text
+ *                       required: false
  *       400:
  *         description: Validation error (invalid name or missing fields)
  *         content:
@@ -88,7 +74,8 @@ interface AuthenticatedRequest extends Request {
  *                   type: array
  *                   items:
  *                     type: string
- *                   example: ["Collection name is required"]
+ *               example:
+ *                 message: ["Collection name is required"]
  *       409:
  *         description: Question collection with the same name already exists
  *         content:
@@ -98,7 +85,8 @@ interface AuthenticatedRequest extends Request {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: שם אסופת השאלות כבר קיים
+ *               example:
+ *                 message: שם אסופת השאלות כבר קיים
  *       500:
  *         description: Server error occurred while creating collection
  *         content:
@@ -108,7 +96,67 @@ interface AuthenticatedRequest extends Request {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Internal server error
+ *               example:
+ *                 message: Internal server error
+ *
+ * components:
+ *   schemas:
+ *     QuestionInput:
+ *       type: object
+ *       required:
+ *         - q
+ *         - qType
+ *         - required
+ *       properties:
+ *         q:
+ *           type: string
+ *           example: How satisfied are you with the service?
+ *         choice:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied"]
+ *         qType:
+ *           type: string
+ *           description: Question type
+ *           enum: [Text, Multiple, Single, Number]
+ *           example: Multiple
+ *         required:
+ *           type: boolean
+ *           example: true
+ *     Question:
+ *       allOf:
+ *         - $ref: '#/components/schemas/QuestionInput'
+ *         - type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               description: Question identifier
+ *               readOnly: true
+ *     QuestionsCol:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: 60e44d556ad3e63f8c05d515
+ *         name:
+ *           type: string
+ *           example: Customer Feedback Set
+ *         description:
+ *           type: string
+ *           example: A basic CSAT questionnaire for new customers
+ *         user:
+ *           type: string
+ *           description: Owner user ID
+ *           example: 66cf2a2b7b3a1a0012ab34cd
+ *         size:
+ *           type: number
+ *           description: Number of questions (derived from questions length)
+ *           example: 2
+ *         questions:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Question'
  */
 export const createQuestionsCol = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {

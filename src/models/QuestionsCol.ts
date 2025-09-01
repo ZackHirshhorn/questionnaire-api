@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { randomUUID } from "crypto";
 
 export enum qType {
   Text = "Text",
@@ -13,10 +14,15 @@ export interface IQuestion extends Document {
   qType: qType;
   required: boolean;
   answer?: string;
+  id: string;
 }
 
 const questionSchema = new mongoose.Schema<IQuestion>(
   {
+    id: {
+      type: String,
+      default: randomUUID()
+    },
     q: {
       type: String,
       required: true
