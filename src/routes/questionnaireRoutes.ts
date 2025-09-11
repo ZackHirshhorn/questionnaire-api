@@ -5,7 +5,7 @@ import {
   getQuestionnairesByUser,
   getQuestionnairesById,
   updateByAuthUser,
-  updateQuestionnaire,
+  updateQuestionnaire
 } from "../controllers/questionnaireController";
 
 const router = express.Router();
@@ -13,7 +13,7 @@ const router = express.Router();
 router.route("/").post(createQuestionnaire);
 router.route("/user").get(protect, getQuestionnairesByUser);
 router.route("/:id").get(getQuestionnairesById);
-router.route("/:id/answer").put(protect, updateQuestionnaire);
+router.route("/:id/answer").put(updateQuestionnaire);
 router.route("/:id/answer/auth").put(protect, updateByAuthUser);
 
 export default router;
