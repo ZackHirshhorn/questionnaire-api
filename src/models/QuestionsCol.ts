@@ -96,8 +96,6 @@ const questionsColSchema = new mongoose.Schema<IQuestionsCol>(
   }
 );
 
-questionsColSchema.index({ name: 1 }, { unique: true });
-
 const QuestionsCol = mongoose.model<IQuestionsCol>(
   "QuestionsCol",
   questionsColSchema
