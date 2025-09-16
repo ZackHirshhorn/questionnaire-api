@@ -641,3 +641,88 @@ export const searchByName = asyncHandler(
     }
   }
 );
+
+/**
+ * @swagger
+ * /api/template/{id}/name:
+ *   put:
+ *     summary: Update a Template's name
+ *     tags: [Template]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: MongoDB ObjectId of the questionnaire template.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: New name for the template.
+ *                 example: "Customer Satisfaction v2"
+ *     responses:
+ *       200:
+ *         description: Name updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "השינוי בוצע בהצלחה"
+ *       400:
+ *         description: Validation error (from Zod schema).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   oneOf:
+ *                     - type: string
+ *                     - type: array
+ *                       items:
+ *                         type: string
+ *             examples:
+ *               invalidName:
+ *                 summary: Invalid name
+ *                 value:
+ *                   message: ["Name must be at least 2 characters"]
+ *       404:
+ *         description: Template not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "שאלון לא קיים"
+ *       500:
+ *         description: Server error.
+ */
+export const updateTempName = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name } = req.body;
+    const trimmedName = name.trim();
+    const result = questionnaireSchema.safeParse({ name: trimmedName });
+    if (!result.success) {
+      const errors = result.error.errors.map((err) => err.message);
+      return res.status(400).json({ message: errors });
+    }
+    const existing = await QuestionnaireTemp.findById(id);
+    if (!existing) {
+      return res.status(404).json({ message: "שאלון לא קיים" });
+    }
+    existing.name = trimmedName;
+    existing.save();
+    return res.status(200).json({ message: "השינוי בוצע בהצלחה" });
+  }
+);

@@ -430,6 +430,6 @@ export const updateQuestionnaire = asyncHandler(
     questionnaire.userPhone = uPhone || null;
     questionnaire.isComplete = isComplete || questionnaire.isComplete;
     await questionnaire.save();
-    return res.status(200);
+    return res.sendStatus(200);
   }
 );
