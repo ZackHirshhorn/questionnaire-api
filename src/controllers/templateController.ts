@@ -210,11 +210,11 @@ export const getTemplateById = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const template = await QuestionnaireTemp.findById(id)
-      .select("name user categories -_id")
+      .select("name user categories _id")
       .populate([
-        { path: "categories.questions", select: "name" },
-        { path: "categories.subCategories.questions", select: "name" },
-        { path: "categories.subCategories.topics.questions", select: "name" }
+        { path: "categories", select: "name _id" },
+        { path: "categories.subCategories", select: "name _id" },
+        { path: "categories.subCategories.topics", select: "name _id" }
       ]);
     return res.status(200).json(template);
   }
